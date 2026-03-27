@@ -16,11 +16,11 @@ LGT Games Portal provides a unified layout and execution environment for standal
 ├── docs/                   # Technical documentation and game specifications
 │   ├── architecture.md
 │   └── games/
-└── game/                   # Standalone game modules
-    ├── tetris/
-    ├── hitori/
-    ├── 2048/
-    └── snake/
+├── tetris/                 # Standalone game module
+├── hitori/                 # Standalone game module
+├── 2048/                   # Standalone game module
+├── snake/                  # Standalone game module
+└── minesweeper/            # Standalone game module
 ```
 
 ## Local Development Environment
