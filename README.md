@@ -1,33 +1,34 @@
-# LGT Games Portal 🎮
+# LGT Games Portal
 
-Welcome to the **LGT Games Portal**, a highly scalable, data-driven web games index built automatically over Cloudflare Pages. This repository houses not only the central portal core logic but also a unified collection of curated, high-aesthetic HTML5 games.
+A highly scalable, data-driven web games index serving a curated collection of modern HTML5 games via Cloudflare Pages.
 
-## 🚀 Live Demo
-Visit [lgt.wtf](https://lgt.wtf) to experience the live games portal.
+## Overview
+LGT Games Portal provides a unified layout and execution environment for standalone vanilla JavaScript games. The platform uses a dynamic routing architecture through `data/games.json` to instantly parse and render game metadata without requiring hardcoded HTML revisions.
 
-## 📂 Repository Structure
+## Directory Structure
 ```text
 /
-├── index.html              # Main portal layout (Data-Driven grid & search)
-├── style.css               # Premium CSS for portal cards and hero section
-├── js/portal.js            # Fetch logic and dynamic DOM rendering for games
-├── data/games.json         # Data source containing all hosted games (Scalable)
-├── shared/                 # Global UI Injector (Header & Footer) across all games
-├── docs/                   # Walkthroughs and architectural documentation
-└── game/                   # Standalone game directories
+├── index.html              # Dynamic portal UI entry point
+├── style.css               # Portal presentation layer
+├── js/portal.js            # JSON parsing and DOM generation logic
+├── data/games.json         # Core game registry for the portal
+├── shared/                 # Global UI Injector (`layout.js`, `global.css`)
+├── docs/                   # Technical documentation and game specifications
+│   ├── architecture.md
+│   └── games/
+└── game/                   # Standalone game modules
     ├── tetris/
     ├── hitori/
     ├── 2048/
     └── snake/
 ```
 
-## 🛠 Local Development
-To test the portal locally and ensure the dynamic JSON data loads properly (preventing localhost CORS restrictions):
-1. Open a terminal in the root directory: `/Users/gt/Desktop/code/lgt-games-portal`.
-2. Run a simple HTTP server: `python3 -m http.server 8083` (or your preferred local server).
-3. Open `http://localhost:8083` in your browser.
+## Local Development Environment
+Deploying locally is strictly recommended for resolving CORS policies during JSON fetching:
+```bash
+python3 -m http.server 8000
+```
+Navigate to `http://localhost:8000`.
 
-## 💡 Tech Stack
-- Vanilla HTML, CSS, JavaScript (No heavy frameworks required)
-- Lucide Icons (Search bar UI)
-- Cloudflare Pages (Seamless deployment setup)
+## Deployment
+This repository is optimized for Zero-Config deployment on Cloudflare Pages or Vercel. Push changes to the `main` branch to trigger an edge deployment.
