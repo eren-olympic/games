@@ -1,5 +1,14 @@
 [
   {
+    "id": "snake",
+    "title": "Snake",
+    "category": "arcade",
+    "desc": "The classic eating game reimagined in high-definition retro cyberpunk style.",
+    "url": "/game/snake/",
+    "bg": "radial-gradient(circle at center, rgba(57, 255, 20, 0.4) 0%, rgba(5, 5, 5, 0.9) 100%)",
+    "opacity": "0.9"
+  },
+  {
     "id": "tetris",
     "title": "Tetris",
     "category": "arcade",
