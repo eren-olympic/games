@@ -24,3 +24,6 @@ yarn-error.log
 # Build files
 dist/
 build/
+
+# internal & AI conversational output
+docs/internal/
