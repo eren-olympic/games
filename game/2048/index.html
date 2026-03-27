@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Vibrant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <h1 class="title">2048</h1>
+                <div class="scores">
+                    <div class="score-box">
+                        <span class="score-label">SCORE</span>
+                        <span id="score" class="score-value">0</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-label">BEST</span>
+                        <span id="best-score" class="score-value">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bottom">
+                <p class="desc">Join the numbers and get to the <strong>2048 tile!</strong></p>
+                <button id="restart-btn" class="primary-btn">New Game</button>
+            </div>
+        </header>
+
+        <main class="game-container">
+            <div class="grid-bg" id="grid-bg">
+                <!-- Injected by JS -->
+            </div>
+            <div class="tile-container" id="tile-container">
+                <!-- Tiles injected by JS -->
+            </div>
+            <div class="game-message hidden" id="game-message">
+                <h2 id="msg-text">Game Over!</h2>
+                <div class="msg-actions">
+                    <button id="retry-btn" class="primary-btn">Try again</button>
+                    <button class="primary-btn hidden" id="keep-playing-btn">Keep going</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/game.js"></script>
+    <script src="/shared/layout.js"></script>
+</body>
+</html>
