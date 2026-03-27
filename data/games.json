@@ -4,7 +4,7 @@
     "title": "Minesweeper",
     "category": "logic",
     "desc": "Classic 16x16 bomb defusal puzzle featuring safe first clicks and modern frosted glass aesthetics.",
-    "url": "/game/minesweeper/",
+    "url": "/minesweeper/",
     "bg": "radial-gradient(circle at bottom right, #f8fafc 0%, #cbd5e1 100%)",
     "opacity": "1"
   },
@@ -13,7 +13,7 @@
     "title": "Snake",
     "category": "arcade",
     "desc": "The classic eating game reimagined in high-definition retro cyberpunk style.",
-    "url": "/game/snake/",
+    "url": "/snake/",
     "bg": "radial-gradient(circle at center, rgba(57, 255, 20, 0.4) 0%, rgba(5, 5, 5, 0.9) 100%)",
     "opacity": "0.9"
   },
@@ -22,7 +22,7 @@
     "title": "Tetris",
     "category": "arcade",
     "desc": "The classic block-stacking game with a premium neon dark mode aesthetic.",
-    "url": "/game/tetris/",
+    "url": "/tetris/",
     "bg": "radial-gradient(circle at top right, #b026ff 0%, #00f3ff 100%)",
     "opacity": "0.85"
   },
@@ -31,7 +31,7 @@
     "title": "Hitori",
     "category": "logic",
     "desc": "A zen-like logic puzzle. Shade the grid to eliminate duplicates.",
-    "url": "/game/hitori/",
+    "url": "/hitori/",
     "bg": "radial-gradient(circle at bottom left, #80cbc4 0%, #0f172a 100%)",
     "opacity": "0.9"
   },
@@ -40,7 +40,7 @@
     "title": "2048",
     "category": "puzzle",
     "desc": "Slide and merge tiles to reach 2048 in this vibrant, buttery-smooth clone.",
-    "url": "/game/2048/",
+    "url": "/2048/",
     "bg": "linear-gradient(135deg, #edc22e 0%, #f59563 100%)",
     "opacity": "0.85"
   }
