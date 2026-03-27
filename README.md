@@ -13,10 +13,12 @@ Visit [lgt.wtf](https://lgt.wtf) to experience the live games portal.
 ├── js/portal.js            # Fetch logic and dynamic DOM rendering for games
 ├── data/games.json         # Data source containing all hosted games (Scalable)
 ├── shared/                 # Global UI Injector (Header & Footer) across all games
+├── docs/                   # Walkthroughs and architectural documentation
 └── game/                   # Standalone game directories
     ├── tetris/
     ├── hitori/
-    └── 2048/
+    ├── 2048/
+    └── snake/
 ```
 
 ## 🛠 Local Development
