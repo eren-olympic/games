@@ -1,0 +1,134 @@
+:root {
+    --bg-page: #0f172a;
+    --bg-board: #1e293b;
+    --text-primary: #f8fafc;
+    
+    --tile-size: 60px;
+    --gap: 5px;
+    --board-width: calc(var(--tile-size) * 5 + var(--gap) * 6);
+    --board-height: calc(var(--tile-size) * 8 + var(--gap) * 9);
+    
+    --c1: #ef4444; /* red */
+    --c2: #f97316; /* orange */
+    --c3: #eab308; /* yellow */
+    --c4: #84cc16; /* lime */
+    --c5: #22c55e; /* green */
+    --c6: #14b8a6; /* teal */
+    --c7: #0ea5e9; /* sky */
+    --c8: #3b82f6; /* blue */
+    --c9: #6366f1; /* indigo */
+    --c10: #8b5cf6; /* violet */
+    --c11: #d946ef; /* fuchsia */
+    --c12: #db2777; /* pink */
+    --c13: #be123c; /* deep rose */
+    --c14: #9f1239; /* darker rose */
+    --c15: #e11d48;
+    --c16: #be185d;
+    --c17: #9d174d;
+    --c18: #831843;
+    --c19: #ff0055;
+    --c20: #ffffff; /* white flash */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Outfit', sans-serif; touch-action: none; }
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+    padding: 70px 20px;
+}
+
+.game-wrapper {
+    display: flex; flex-direction: column; gap: 15px;
+    width: var(--board-width);
+}
+
+.header {
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.title { font-size: 3rem; font-weight: 900; letter-spacing: 2px; }
+
+.score-card {
+    background: var(--bg-board);
+    padding: 5px 15px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.score-card span:first-child { font-size: 0.8rem; opacity: 0.7; font-weight: 700; }
+.score-card span:last-child { font-size: 1.8rem; font-weight: 900; }
+
+.danger-bar-wrapper {
+    width: 100%; height: 10px;
+    background: var(--bg-board);
+    border-radius: 5px; overflow: hidden;
+}
+
+.danger-bar {
+    height: 100%; width: 0%;
+    background: #ef4444;
+    transition: width 0.1s linear;
+}
+
+.board-frame {
+    position: relative;
+    width: var(--board-width);
+    height: var(--board-height);
+    background: var(--bg-board);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 2px 10px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.game-board {
+    position: relative;
+    width: 100%; height: 100%;
+}
+
+.tile {
+    position: absolute;
+    width: var(--tile-size); height: var(--tile-size);
+    border-radius: 8px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.8rem; font-weight: 900;
+    color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: grab;
+    transition: bottom 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.2s ease, transform 0.1s;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.2);
+    z-index: 10;
+}
+
+.tile:active { cursor: grabbing; }
+
+.tile.dragging {
+    transition: none; /* No transition while following cursor */
+    z-index: 100;
+    transform: scale(1.1);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.2);
+}
+
+.overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 20px; z-index: 200;
+}
+
+.overlay h2 { font-size: 3rem; color: #ef4444; font-weight: 900; }
+.overlay.hidden { display: none; }
+
+.btn {
+    padding: 12px 24px; font-size: 1.2rem; font-weight: 700;
+    background: white; color: var(--bg-page);
+    border: none; border-radius: 8px; cursor: pointer;
+}
+.btn:hover { background: #e2e8f0; }
+
+@media (max-width: 400px) {
+    :root {
+        --tile-size: 50px;
+    }
+}

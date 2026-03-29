@@ -1,5 +1,14 @@
 [
   {
+    "id": "twenty",
+    "title": "二十",
+    "category": "puzzle",
+    "desc": "Frantic action puzzle. Merge blocks, fight gravity, and reach Twenty before the board fills up.",
+    "url": "/twenty/",
+    "bg": "radial-gradient(circle at center, #6366f1 0%, #0f172a 100%)",
+    "opacity": "1"
+  },
+  {
     "id": "minesweeper",
     "title": "Minesweeper",
     "category": "logic",

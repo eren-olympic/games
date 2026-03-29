@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Twenty - LGT Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="header">
+            <h1 class="title">TWENTY</h1>
+            <div class="score-card">
+                <span>MAX</span>
+                <span id="max-tile">1</span>
+            </div>
+        </div>
+
+        <div class="danger-bar-wrapper">
+            <div id="danger-bar" class="danger-bar"></div>
+        </div>
+
+        <div class="board-frame">
+            <div id="game-board" class="game-board">
+                <!-- Tiles dynamically injected here -->
+            </div>
+            
+            <div id="game-over" class="overlay hidden">
+                <h2>OVERLOAD</h2>
+                <button id="restart-btn" class="btn">REBOOT SYSTEM</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+    <script src="/shared/layout.js"></script>
+</body>
+</html>
