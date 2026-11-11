@@ -1,3 +1,12 @@
+LGT.init({
+    game: 'tetris',
+    title: '俄羅斯方塊',
+    themes: ['original', 'dark', 'light', 'neo'],
+    swatch: 'linear-gradient(135deg,#0d0d1a 50%,#00f3ff 50%)',
+    records: { kind: 'score' }
+});
+loadPalette();
+
 const canvas = document.getElementById('board-canvas');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -7,6 +16,7 @@ const ctxHold = holdCanvas.getContext('2d');
 
 let board = new Board(ctx, ctxNext, ctxHold);
 let requestId = null;
+let isOver = false; // set once per game so a finished game is recorded exactly once
 let time = { start: 0, elapsed: 0, level: 1000 };
 
 let accountValues = {
@@ -20,7 +30,12 @@ function updateAccount(key, value) {
     if (element) {
         element.textContent = value;
     }
+    if (key === 'score' && window.LGT) {
+        document.getElementById('best').textContent = Math.max(LGT.best() || 0, value);
+    }
 }
+
+document.getElementById('best').textContent = LGT.best() || 0;
 
 let account = new Proxy(accountValues, {
     set: (target, key, value) => {
@@ -90,6 +105,12 @@ function executeMove(code) {
 }
 
 function handleKeyDown(event) {
+    // theme menu / records panel open: the kit owns the keyboard
+    if (LGT.isOpen() || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.code === 'KeyT') {
+        LGT.cycleTheme();
+        return;
+    }
     // Only handle gameplay keys if game is running
     if (event.code === 'KeyP') {
         pause();
@@ -127,6 +148,17 @@ function handleKeyUp(event) {
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
+// records panel opens: pause and drop any held keys
+addEventListener('lgt:records-open', () => {
+    keyState = {};
+    if (requestId) pause();
+});
+// theme switch: re-read canvas colours and repaint (also while paused / game over)
+addEventListener('lgt:theme', () => {
+    loadPalette();
+    board.draw();
+});
+
 function play() {
     resetGame();
     time.start = performance.now();
@@ -140,6 +172,8 @@ function play() {
 }
 
 function resetGame() {
+    isOver = false;
+    document.getElementById('overlay-sub').textContent = '';
     account.score = 0;
     account.lines = 0;
     account.level = 1;
@@ -160,6 +194,7 @@ function animate(now = 0) {
             }
         }
     });
+    if (isOver) return; // a held key topped out the stack
 
     if (time.elapsed > time.level) {
         time.start = now;
@@ -176,6 +211,18 @@ function animate(now = 0) {
 function gameOver() {
     cancelAnimationFrame(requestId);
     requestId = null;
+    keyState = {};
+    if (isOver) return;
+    isOver = true;
+
+    const rec = LGT.addRecord({
+        value: account.score,
+        detail: '行數 ' + account.lines + ' · 等級 ' + account.level
+    });
+    document.getElementById('best').textContent = LGT.best() || 0;
+    const sub = document.getElementById('overlay-sub');
+    if (rec.isBest && account.score > 0) sub.innerHTML = '<span class="overlay-rec">新紀錄！</span>';
+    else sub.textContent = '最佳 ' + LGT.format(LGT.best() || 0);
     
     document.getElementById('overlay-title').textContent = 'GAME OVER';
     document.getElementById('overlay-msg').textContent = 'Score: ' + account.score;

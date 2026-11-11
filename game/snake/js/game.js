@@ -6,18 +6,27 @@ const msgEl = document.getElementById('game-message');
 const msgText = document.getElementById('msg-text');
 const startBtn = document.getElementById('start-btn');
 const retryBtn = document.getElementById('retry-btn');
+const msgSub = document.getElementById('msg-sub');
+
+LGT.init({
+    game: 'snake',
+    title: '貪食蛇',
+    themes: ['original', 'dark', 'light', 'neo'],
+    swatch: 'linear-gradient(135deg,#050505 50%,#39ff14 50%)',
+    records: { kind: 'score', legacyBest: Number(localStorage.getItem('snake-best')) || 0 }
+});
 
 let snake = [];
 let food = {};
 let direction = { x: 0, y: -1 };  // Up
 let nextDirection = { x: 0, y: -1 }; 
 let score = 0;
-let bestScore = localStorage.getItem('snake-best') || 0;
 let gameInterval;
 const SPEED = 130; 
 let isGameOver = true;
+let isPaused = false; // only while the records panel is open
 
-bestScoreEl.textContent = bestScore;
+bestScoreEl.textContent = LGT.best() || 0;
 
 function initGame() {
     snake = [
@@ -30,6 +39,8 @@ function initGame() {
     score = 0;
     updateScore();
     isGameOver = false;
+    isPaused = false;
+    msgSub.textContent = '';
     msgEl.classList.add('hidden');
     startBtn.classList.add('hidden');
     retryBtn.classList.add('hidden');
@@ -109,24 +120,39 @@ function generateFood() {
 }
 
 function gameOver() {
+    if (isGameOver) return;
     isGameOver = true;
     clearInterval(gameInterval);
+    const rec = LGT.addRecord({ value: score, detail: '長度 ' + snake.length });
+    updateScore();
     msgText.textContent = "SYSTEM CRASH";
-    msgText.style.color = "var(--food-color)";
+    msgSub.innerHTML = '得分 ' + LGT.format(score) + '　·　' +
+        (rec.isBest && score > 0 ? '<span class="msg-rec">新紀錄！</span>' : '最佳 ' + LGT.format(LGT.best() || 0));
     msgEl.classList.remove('hidden');
     retryBtn.classList.remove('hidden');
 }
 
 function updateScore() {
     scoreEl.textContent = score;
-    if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem('snake-best', bestScore);
-        bestScoreEl.textContent = bestScore;
-    }
+    bestScoreEl.textContent = Math.max(LGT.best() || 0, score);
 }
 
+// pause while the records panel is open; resume when it closes
+addEventListener('lgt:records-open', () => {
+    if (isGameOver || isPaused) return;
+    isPaused = true;
+    clearInterval(gameInterval);
+});
+addEventListener('lgt:records-close', () => {
+    if (!isPaused || isGameOver) return;
+    isPaused = false;
+    gameInterval = setInterval(gameLoop, SPEED);
+});
+
 document.addEventListener('keydown', e => {
+    // theme menu / records panel open: the kit owns the keyboard
+    if (LGT.isOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === 'KeyT') { LGT.cycleTheme(); return; }
     if (isGameOver) {
         if (e.code === 'Space' || e.code === 'Enter') initGame();
         return;
@@ -159,11 +185,11 @@ document.addEventListener('touchstart', e => {
 }, {passive: false});
 
 document.addEventListener('touchmove', e => {
-    if (!isGameOver) e.preventDefault(); 
+    if (!isGameOver && !LGT.isOpen()) e.preventDefault(); 
 }, {passive: false});
 
 document.addEventListener('touchend', e => {
-    if (!touchStart || isGameOver) return;
+    if (!touchStart || isGameOver || LGT.isOpen()) { touchStart = null; return; }
     
     const dx = e.changedTouches[0].clientX - touchStart.x;
     const dy = e.changedTouches[0].clientY - touchStart.y;

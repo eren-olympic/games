@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="version" content="1.1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minesweeper - LGT Games</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -16,13 +17,18 @@
                 <span id="mine-count">040</span>
             </div>
             
-            <button id="reset-btn" class="reset-btn">
-                <i data-lucide="smile" id="status-icon"></i>
-            </button>
+            <div class="hdr-mid">
+                <span id="kit-left" class="kit-left"></span>
+                <button id="reset-btn" class="reset-btn">
+                    <i data-lucide="smile" id="status-icon"></i>
+                </button>
+                <span data-lgt-kit></span>
+            </div>
             
-            <div class="stat-box">
+            <div class="stat-box time-box">
                 <i data-lucide="clock" class="icon text-blue"></i>
                 <span id="timer">000</span>
+                <small class="best-time" title="最快完成時間">最快 <b id="best-time">—</b></small>
             </div>
         </div>
 
@@ -30,11 +36,26 @@
             <div id="grid" class="grid"></div>
             
             <div id="game-over-overlay" class="overlay hidden">
-                <h2 id="overlay-text">GAME OVER</h2>
+                <div class="overlay-card">
+                    <h2 id="overlay-text">GAME OVER</h2>
+                    <p id="overlay-sub" class="overlay-sub"></p>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="/shared/lgt-kit.js"></script>
+    <script>
+        LGT.init({
+            game: 'minesweeper',
+            title: '踩地雷',
+            themes: ['original', 'dark', 'light', 'neo'],
+            swatch: 'linear-gradient(135deg,#e2e8f0 50%,#3b82f6 50%)',
+            records: { kind: 'time' }
+        });
+        // records button to the left of the face, theme button to the right
+        document.getElementById('kit-left').appendChild(document.getElementById('lgtRecBtn'));
+    </script>
     <script src="js/game.js"></script>
     <script src="/shared/layout.js"></script>
     <script>lucide.createIcons();</script>

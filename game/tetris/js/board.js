@@ -97,16 +97,25 @@ class Board {
         while (this.valid({ ...ghost, y: ghost.y + 1 })) {
             ghost.y++;
         }
-        this.ctx.globalAlpha = 0.2;
+        this.ctx.globalAlpha = PAL.ghost;
         ghost.draw(this.ctx);
         this.ctx.globalAlpha = 1;
     }
 
     drawBoard() {
+        if (PAL.grid) {
+            const c = this.ctx;
+            c.strokeStyle = PAL.grid;
+            c.lineWidth = 1 / BLOCK_SIZE;
+            c.beginPath();
+            for (let x = 1; x < COLS; x++) { c.moveTo(x, 0); c.lineTo(x, ROWS); }
+            for (let y = 1; y < ROWS; y++) { c.moveTo(0, y); c.lineTo(COLS, y); }
+            c.stroke();
+        }
         this.grid.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value > 0) {
-                    this.piece.drawBlock(this.ctx, x, y, value);
+                    Tetromino.prototype.drawBlock(this.ctx, x, y, value);
                 }
             });
         });

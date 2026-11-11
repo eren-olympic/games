@@ -216,3 +216,133 @@ body {
     .title { font-size: 2.8rem; }
     .game-message h2 { font-size: 2.2rem; }
 }
+
+/* ======================================================================
+   LGT kit additions: header buttons, game-over sub line, themes.
+   The rules above are the original look (data-theme="original") and are
+   left as they were. The three family themes below share one ruleset
+   driven by --f-* tokens; neo adds its structural tweaks after that.
+   ====================================================================== */
+.header-bottom { display: flex; align-items: center; gap: 12px; }
+.header-bottom .desc { flex: 1; min-width: 0; }
+.lgt-kit { flex: none; }
+.msg-sub { font-size: 1rem; color: var(--text-light); opacity: .85; margin-top: -14px; letter-spacing: 1px; }
+.msg-sub:empty { display: none; }
+.msg-rec { color: var(--text-neon); font-weight: 700; text-shadow: 0 0 8px rgba(57, 255, 20, 0.6); }
+
+/* original: kit buttons as small neon boxes, like the score boxes */
+:root[data-theme="original"] .lgt-btn {
+    background: rgba(57, 255, 20, 0.1);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    border-radius: 4px;
+    color: var(--text-neon);
+    box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.1);
+}
+:root[data-theme="original"] .lgt-btn:hover { border-color: var(--text-neon); box-shadow: 0 0 10px rgba(57, 255, 20, 0.4); }
+
+/* ---------- family tokens ---------- */
+:root[data-theme="dark"] {
+    --f-bg: #0e1016; --f-panel: #161922; --f-panel2: #1c202b; --f-border: #262b38;
+    --f-text: #e6e8ee; --f-muted: #8b93a7; --f-accent: #7c8cff; --f-accent2: #a78bfa;
+    --f-shadow: 0 10px 40px rgba(0, 0, 0, .45); --f-grid: rgba(255, 255, 255, .035);
+    --f-overlay: rgba(14, 16, 22, .84); --f-msg: #ff6b7a; --f-rec: #ffb454;
+    --snake-color: #7c8cff; --snake-head: #a78bfa; --food-color: #ff7a8a;
+}
+:root[data-theme="light"] {
+    --f-bg: #eef0f6; --f-panel: #ffffff; --f-panel2: #f5f6fa; --f-border: #e1e4ec;
+    --f-text: #1b2133; --f-muted: #6b7389; --f-accent: #4f5bff; --f-accent2: #8b5cf6;
+    --f-shadow: 0 10px 40px rgba(30, 40, 80, .12); --f-grid: rgba(20, 30, 60, .05);
+    --f-overlay: rgba(255, 255, 255, .86); --f-msg: #e5354a; --f-rec: #c77700;
+    --snake-color: #4f5bff; --snake-head: #8b5cf6; --food-color: #e5354a;
+}
+:root[data-theme="neo"] {
+    --f-bg: var(--neo-bg, #c9b8ff); --f-panel: #ffffff; --f-panel2: #f1ecff; --f-border: #111;
+    --f-text: #111; --f-muted: #2e2a45; --f-accent: #111; --f-accent2: #111;
+    --f-shadow: 6px 6px 0 #111; --f-grid: rgba(17, 17, 17, .07);
+    --f-overlay: rgba(255, 255, 255, .9); --f-msg: #111; --f-rec: #0f8a4f;
+    --snake-color: #7cf29a; --snake-head: #2fbf5f; --food-color: #ff70a6;
+}
+
+/* ---------- shared family look (dark / light / neo) ---------- */
+:root:not([data-theme="original"]) body {
+    background: var(--f-bg);
+    color: var(--f-text);
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s;
+}
+:root:not([data-theme="original"]) .title {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: none;
+    background: linear-gradient(135deg, var(--f-accent), var(--f-accent2));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+}
+:root:not([data-theme="original"]) .score-box {
+    background: var(--f-panel); border: 1px solid var(--f-border); border-radius: 10px;
+    color: var(--f-text); box-shadow: none; min-width: 64px;
+}
+:root:not([data-theme="original"]) .score-label { color: var(--f-muted); opacity: 1; font-size: .72rem; }
+:root:not([data-theme="original"]) .score-value { font-variant-numeric: tabular-nums; }
+:root:not([data-theme="original"]) .desc,
+:root:not([data-theme="original"]) .controls-hint { color: var(--f-muted); opacity: 1; }
+:root:not([data-theme="original"]) .game-container {
+    background: var(--f-panel); border: 1px solid var(--f-border); border-radius: 14px; box-shadow: var(--f-shadow);
+}
+:root:not([data-theme="original"]) .game-board {
+    background-image:
+        linear-gradient(to right, var(--f-grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--f-grid) 1px, transparent 1px);
+}
+:root:not([data-theme="original"]) .snake-part { box-shadow: none; margin: 1px; border-radius: 5px; }
+:root:not([data-theme="original"]) .snake-head { border-radius: 7px; }
+:root:not([data-theme="original"]) .food { box-shadow: none; margin: 2px; animation: pulseFoodPlain 1.5s infinite; }
+@keyframes pulseFoodPlain { 0%, 100% { transform: scale(0.85); } 50% { transform: scale(1.05); } }
+:root:not([data-theme="original"]) .game-message { background: var(--f-overlay); }
+:root:not([data-theme="original"]) .game-message h2 {
+    color: var(--f-msg); text-shadow: none; font-size: 2.4rem; letter-spacing: 1px;
+}
+:root:not([data-theme="original"]) .msg-sub { color: var(--f-muted); opacity: 1; letter-spacing: 0; }
+:root:not([data-theme="original"]) .msg-rec { color: var(--f-rec); text-shadow: none; }
+:root:not([data-theme="original"]) .primary-btn {
+    background: linear-gradient(135deg, var(--f-accent), var(--f-accent2));
+    color: #fff; border: 0; border-radius: 12px; padding: 11px 26px; font-size: 1rem; font-weight: 600;
+    letter-spacing: 1px; box-shadow: 0 4px 14px rgba(124, 140, 255, .3);
+}
+:root:not([data-theme="original"]) .primary-btn:hover { filter: brightness(1.08); background: linear-gradient(135deg, var(--f-accent), var(--f-accent2)); color: #fff; }
+:root[data-theme="dark"] .lgt-btn,
+:root[data-theme="light"] .lgt-btn { background: var(--f-panel); border: 1px solid var(--f-border); color: var(--f-text); border-radius: 10px; }
+:root[data-theme="dark"] .lgt-btn:hover,
+:root[data-theme="light"] .lgt-btn:hover { border-color: var(--f-accent); }
+
+/* ---------- neo: thick outlines, hard shadows, flat colours ---------- */
+:root[data-theme="neo"] .title {
+    font-family: var(--neo-font, "Archivo Black", sans-serif); font-weight: 400; font-size: 2.9rem; letter-spacing: 0;
+    background: none; color: #111; text-shadow: 3px 3px 0 #7cf29a;
+}
+:root[data-theme="neo"] .score-box { border: 3px solid #111; border-radius: 8px; box-shadow: 4px 4px 0 #111; padding: 6px 13px; }
+:root[data-theme="neo"] .score-label { color: #111; font-weight: 700; }
+:root[data-theme="neo"] .score-value { font-family: var(--neo-font, "Archivo Black", sans-serif); font-weight: 400; }
+:root[data-theme="neo"] .game-container { border: 3px solid #111; border-radius: 12px; }
+:root[data-theme="neo"] .snake-part { margin: 0; border: 2px solid #111; border-radius: 4px; }
+:root[data-theme="neo"] .snake-head { border-radius: 6px; }
+:root[data-theme="neo"] .food { margin: 1px; border: 2px solid #111; }
+:root[data-theme="neo"] .game-message h2 { font-family: var(--neo-font, "Archivo Black", sans-serif); font-weight: 400; text-shadow: 3px 3px 0 #ff70a6; }
+:root[data-theme="neo"] .msg-sub { color: #111; font-weight: 700; }
+:root[data-theme="neo"] .msg-rec { background: #7cf29a; color: #111; border: 2px solid #111; border-radius: 6px; padding: 1px 8px; }
+:root[data-theme="neo"] .primary-btn {
+    background: #ffe14d; color: #111; border: 3px solid #111; border-radius: 8px; box-shadow: 4px 4px 0 #111;
+    font-family: var(--neo-font, "Archivo Black", sans-serif); font-weight: 400; transition: transform .08s, box-shadow .08s;
+}
+:root[data-theme="neo"] .primary-btn:hover { filter: none; background: #ffe14d; color: #111; transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #111; }
+:root[data-theme="neo"] .primary-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #111; }
+
+@media (max-width: 450px) {
+    :root:not([data-theme="original"]) .title { font-size: 2.1rem; }
+    :root[data-theme="neo"] .title { font-size: 1.9rem; }
+    :root:not([data-theme="original"]) .score-box { min-width: 0; padding: 6px 12px; }
+    :root:not([data-theme="original"]) .game-message h2 { font-size: 1.9rem; }
+    .lgt-kit { flex-direction: column; gap: 6px; }
+}

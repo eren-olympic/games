@@ -2,9 +2,11 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="version" content="1.0.1">
+<meta name="version" content="1.1.0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>殺手數獨 · Killer Sudoku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap">
 <style>
 :root{
   --bg:#0e1016;--panel:#161922;--panel2:#1c202b;--border:#262b38;
@@ -14,7 +16,7 @@
   --accent:#7c8cff;--accent2:#a78bfa;--err:#ff6b7a;--errbg:#3a1f28;--ok:#5fd3a0;
   --text:#e6e8ee;--muted:#8b93a7;--shadow:0 10px 40px rgba(0,0,0,.45);
 }
-:root.light{
+:root[data-theme="light"]{
   --bg:#eef0f6;--panel:#ffffff;--panel2:#f5f6fa;--border:#e1e4ec;
   --cell:#ffffff;--peer:#eef1f8;--cagehl:#f0f3fb;--same:#d7defb;--sel:#b9c6fd;--selmulti:#cbd5fd;
   --thin:#d8dce6;--thick:#323a4f;--cage:#8790a5;--sum:#2f364a;
@@ -38,6 +40,7 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .spacer{flex:1}
 .stat{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
 .stat b{color:var(--text);font-weight:600}
+.stat.best[hidden]{display:none}
 .iconbtn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);transition:.15s}
 .iconbtn:hover{border-color:var(--accent)}
 .iconbtn svg{width:18px;height:18px}
@@ -71,6 +74,7 @@ main{display:flex;gap:22px;align-items:flex-start;justify-content:center}
 .cover .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:26px 30px;box-shadow:var(--shadow);min-width:240px}
 .cover h2{margin:0 0 6px;font-size:22px}
 .cover p{margin:4px 0 16px;color:var(--muted);font-size:14px}
+.cover .rec{display:block;margin-bottom:4px;color:var(--hit);font-weight:700;font-size:15px}
 .spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:sp 0.8s linear infinite;margin:0 auto 12px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .board.win .cell{animation:pop .6s ease both}
@@ -111,7 +115,7 @@ kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;paddi
 .sw:checked::after{left:16px}
 .hintbar{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 12px}
 .hintbar span{display:flex;align-items:center;gap:5px}
-.help{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:20;backdrop-filter:blur(4px)}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:100000;backdrop-filter:blur(4px)}
 .help.show{display:grid}
 .help .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px 26px;box-shadow:var(--shadow);width:min(560px,92vw);max-height:88vh;overflow:auto}
 .help h2{margin:0 0 14px;font-size:18px}
@@ -121,6 +125,66 @@ kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;paddi
 .help .sec td{color:var(--muted);font-size:12px;letter-spacing:1px;padding-top:14px;border:0}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--border);padding:9px 16px;border-radius:12px;box-shadow:var(--shadow);font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:30}
 .toast.show{opacity:1;transform:translateX(-50%)}
+/* ---------- neubrutalism theme ---------- */
+:root[data-theme="neo"]{
+  --bg:#c9b8ff;--panel:#ffffff;--panel2:#f1ecff;--border:#111;
+  --cell:#ffffff;--peer:#ece4ff;--cagehl:#fff6c7;--same:#b6f5c8;--sel:#ffe14d;--selmulti:#fff0a0;
+  --thin:#b9b0d6;--thick:#111;--cage:#111;--sum:#111;
+  --given:#111;--user:#2f3fd6;--note:#3b3754;--hit:#c2410c;
+  --accent:#3a49e6;--accent2:#3a49e6;--err:#e8283c;--errbg:#ffc2c8;--ok:#0f8a4f;
+  --text:#111;--muted:#2e2a45;--shadow:6px 6px 0 #111;
+  --neofont:"Archivo Black","Noto Sans TC","PingFang TC",sans-serif;
+}
+:root[data-theme="neo"] .logo,:root[data-theme="neo"] .cover h2,:root[data-theme="neo"] .help h2,:root[data-theme="neo"] .stat b,
+:root[data-theme="neo"] .cageinfo .big,:root[data-theme="neo"] .pad button{font-family:var(--neofont);font-weight:400}
+:root[data-theme="neo"] .logo .mark{background:#ff70a6;color:#111;border:2.5px solid #111;border-radius:8px;box-shadow:2px 2px 0 #111}
+:root[data-theme="neo"] .iconbtn{background:#fff;border:2.5px solid #111;border-radius:8px;box-shadow:3px 3px 0 #111;color:#111;transition:transform .08s,box-shadow .08s}
+:root[data-theme="neo"] .iconbtn:hover{border-color:#111;transform:translate(-1px,-1px);box-shadow:4px 4px 0 #111}
+:root[data-theme="neo"] .iconbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+:root[data-theme="neo"] .primary{background:#ffe14d;color:#111;border:3px solid #111;border-radius:8px;box-shadow:4px 4px 0 #111;font-family:var(--neofont);font-weight:400;transition:transform .08s,box-shadow .08s}
+:root[data-theme="neo"] .primary:hover{filter:none;transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}
+:root[data-theme="neo"] .primary:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
+:root[data-theme="neo"] .diffs{background:#fff;border:2.5px solid #111;border-radius:10px;box-shadow:3px 3px 0 #111}
+:root[data-theme="neo"] .diffs button{color:#2e2a45;font-weight:600;border:2px solid transparent;border-radius:7px}
+:root[data-theme="neo"] .diffs button.on{background:#ffe14d;color:#111;box-shadow:none;border-color:#111;font-weight:800}
+:root[data-theme="neo"] .stat{color:#111}
+:root[data-theme="neo"] .board{border:3px solid #111;border-radius:12px}
+:root[data-theme="neo"] .v{font-family:var(--neofont);font-weight:400;font-size:5.8cqw}
+:root[data-theme="neo"] .cell.given .v{font-weight:400}
+:root[data-theme="neo"] .notes i{font-weight:700;font-size:2.2cqw}
+:root[data-theme="neo"] .notes i.hit{font-weight:900}
+:root[data-theme="neo"] .overlay-svg .thick{stroke-width:3.5px}
+:root[data-theme="neo"] .overlay-svg .cage{stroke-width:1.4px}
+:root[data-theme="neo"] .overlay-svg .sums{font-family:var(--neofont);font-weight:400;font-size:15px}
+:root[data-theme="neo"] .cover .card,:root[data-theme="neo"] .help .card{border:3px solid #111;border-radius:12px;box-shadow:8px 8px 0 #111}
+:root[data-theme="neo"] .cover .rec{color:#111;background:#7cf29a;border:2px solid #111;border-radius:6px;width:max-content;margin:0 auto 8px;padding:2px 10px}
+:root[data-theme="neo"] .spin{border-color:#111;border-top-color:#ff70a6}
+:root[data-theme="neo"] .panel{border:3px solid #111;border-radius:12px;box-shadow:4px 4px 0 #111}
+:root[data-theme="neo"] .panel h3{color:#111;font-weight:800}
+:root[data-theme="neo"] .combo{background:#fff;border:2px solid #111;border-radius:6px;font-weight:700;padding:3px 8px}
+:root[data-theme="neo"] .combo.only{background:#7cf29a;border-color:#111;color:#111}
+:root[data-theme="neo"] .combo.dead{opacity:.35}
+:root[data-theme="neo"] .modes{background:#f1ecff;border:2.5px solid #111;border-radius:10px}
+:root[data-theme="neo"] .modes button{color:#2e2a45;font-weight:600;border:2px solid transparent;border-radius:7px}
+:root[data-theme="neo"] .modes button.on{background:#ffe14d;color:#111;border-color:#111;box-shadow:2px 2px 0 #111;font-weight:800}
+:root[data-theme="neo"] .modes button.on.note{background:#4cc9f0;color:#111}
+:root[data-theme="neo"] .pad button{background:#fff;border:2.5px solid #111;border-radius:10px;box-shadow:3px 3px 0 #111;color:#111;transition:transform .08s,box-shadow .08s}
+:root[data-theme="neo"] .pad button:hover{border-color:#111;transform:translate(-1px,-1px);box-shadow:4px 4px 0 #111}
+:root[data-theme="neo"] .pad button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+:root[data-theme="neo"] .pad button .cnt{font-family:ui-rounded,system-ui,sans-serif;font-weight:700;color:#2e2a45}
+:root[data-theme="neo"] .pad.notemode button{background:#e3f7fd;color:#2f3fd6}
+:root[data-theme="neo"] .pad button.done{opacity:.3;box-shadow:none}
+:root[data-theme="neo"] .actions button{color:#111;font-weight:600;border:2px solid transparent}
+:root[data-theme="neo"] .actions button:hover{background:#f1ecff;border-color:#111;color:#111}
+:root[data-theme="neo"] .toggles label{color:#111;font-weight:600}
+:root[data-theme="neo"] .sw{background:#fff;border:2px solid #111}
+:root[data-theme="neo"] .sw::after{width:12px;height:12px;background:#111}
+:root[data-theme="neo"] .sw:checked{background:#7cf29a}
+:root[data-theme="neo"] kbd{border:1.5px solid #111;background:#fff;color:#111}
+:root[data-theme="neo"] .hintbar{color:#111}
+:root[data-theme="neo"] .help{background:rgba(17,17,17,.35);backdrop-filter:none}
+:root[data-theme="neo"] .help td{border-bottom:1.5px solid #111}
+:root[data-theme="neo"] .toast{border:3px solid #111;border-radius:8px;box-shadow:4px 4px 0 #111;font-weight:700}
 /* portal chrome: keep the footer in page flow here so it doesn't eat board height */
 html body #global-footer{position:static}
 html body{padding-bottom:0!important}
@@ -130,6 +194,19 @@ html body{padding-bottom:0!important}
   .board{--size:min(calc(100vw - 40px),640px)}
   .hintbar{display:none}
 }
+/* phone header: logo + stats / full-width difficulty tabs / buttons + new game */
+@media (max-width:600px){
+  header{gap:10px}
+  .logo{white-space:nowrap;margin-right:auto}
+  .stat{order:2;white-space:nowrap}
+  .spacer{display:none}
+  .diffs{order:3;flex:1 1 100%}
+  .diffs button{flex:1;padding:6px 4px}
+  #pauseBtn,#helpBtn,[data-lgt-kit]{order:4}
+  header .iconbtn{width:36px;height:36px;flex:none}
+  #newBtn{order:5;margin-left:auto}
+}
+@media (max-width:400px){header{gap:8px}.logo{font-size:18px;gap:8px}.stat{gap:4px;font-size:13px}}
 </style>
 </head>
 <body>
@@ -140,11 +217,12 @@ html body{padding-bottom:0!important}
       <button data-d="easy">簡單</button><button data-d="medium">中等</button><button data-d="hard">困難</button><button data-d="expert">專家</button>
     </div>
     <div class="spacer"></div>
+    <div class="stat best" id="bestStat" title="這個難度的最快紀錄" hidden>最快 <b id="best"></b></div>
     <div class="stat">錯誤 <b id="mistakes">0</b></div>
     <div class="stat"><b id="timer">00:00</b></div>
     <button class="iconbtn" id="pauseBtn" title="暫停 (P)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
-    <button class="iconbtn" id="themeBtn" title="切換主題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
     <button class="iconbtn" id="helpBtn" title="快捷鍵 (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
+    <span data-lgt-kit></span>
     <button class="primary" id="newBtn">新遊戲</button>
   </header>
 
@@ -198,7 +276,7 @@ html body{padding-bottom:0!important}
 </div>
 
 <div class="help" id="help"><div class="card">
-  <h2>鍵盤快捷鍵 <span style="font-size:12px;color:var(--muted);font-weight:400">v1.0.1</span></h2>
+  <h2>鍵盤快捷鍵 <span style="font-size:12px;color:var(--muted);font-weight:400">v1.1.0</span></h2>
   <table>
     <tr class="sec"><td colspan="2">輸入</td></tr>
     <tr><td><kbd>1</kbd>–<kbd>9</kbd></td><td>填數字（筆記模式下切換筆記）</td></tr>
@@ -221,11 +299,13 @@ html body{padding-bottom:0!important}
     <tr><td><kbd>⌘/Ctrl</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> 或 <kbd>Y</kbd></td><td>重做</td></tr>
     <tr><td><kbd>H</kbd></td><td>提示（揭示游標格）</td></tr>
     <tr><td><kbd>P</kbd></td><td>暫停 / 繼續</td></tr>
+    <tr><td><kbd>T</kbd></td><td>切換主題</td></tr>
     <tr><td><kbd>?</kbd></td><td>這個說明</td></tr>
   </table>
 </div></div>
 <div class="toast" id="toast"></div>
 
+<script src="/shared/lgt-kit.js"></script>
 <script>
 // ================= Generator (runs inside a Web Worker) =================
 function genLib(){
@@ -411,7 +491,13 @@ const SAVE_KEY='killer-sudoku-v1';
 let S=null;                 // game state
 let sel=new Set(),cursor=40,noteMode=false,paused=false;
 let undoStack=[],redoStack=[];
-const opts=Object.assign({check:true,clean:true,same:true,theme:'dark',diff:'expert'},JSON.parse(localStorage.getItem(SAVE_KEY+'-opts')||'{}'));
+const opts=Object.assign({check:true,clean:true,same:true,diff:'expert'},JSON.parse(localStorage.getItem(SAVE_KEY+'-opts')||'{}'));
+// shared theme picker + local records (opts.theme is the pre-1.1 dark/light toggle, migrated once)
+LGT.init({game:'killer-sudoku',title:'殺手數獨',themes:['dark','light','neo'],buttonClass:'iconbtn',legacyTheme:opts.theme,
+  records:{kind:'time',variants:Object.keys(DIFF_LABEL).map(id=>({id,label:DIFF_LABEL[id]}))}});
+// the trophy opens on the difficulty being played, not the last tab viewed
+document.querySelector('[data-lgt-kit]').addEventListener('click',e=>{
+  if(e.target.closest('#lgtRecBtn')){e.stopPropagation();LGT.openRecords(S?S.diff:opts.diff)}},true);
 
 // ---------- worker ----------
 let worker=null;
@@ -484,10 +570,10 @@ function drawSvg(){
     }
   });
   $('#svg').innerHTML=
-    `<path d="${thin}" stroke="var(--thin)" stroke-width="2" fill="none" vector-effect="non-scaling-stroke"/>`+
-    `<path d="${cage}" stroke="var(--cage)" stroke-width="1.3" stroke-dasharray="4 3.5" fill="none" vector-effect="non-scaling-stroke"/>`+
-    `<path d="${thick}" stroke="var(--thick)" stroke-width="2.2" fill="none" vector-effect="non-scaling-stroke"/>`+
-    `<g fill="var(--sum)" font-size="17" font-weight="600" font-family="ui-rounded,system-ui,sans-serif">${labels}</g>`;
+    `<path class="thin" d="${thin}" stroke="var(--thin)" stroke-width="2" fill="none" vector-effect="non-scaling-stroke"/>`+
+    `<path class="cage" d="${cage}" stroke="var(--cage)" stroke-width="1.3" stroke-dasharray="4 3.5" fill="none" vector-effect="non-scaling-stroke"/>`+
+    `<path class="thick" d="${thick}" stroke="var(--thick)" stroke-width="2.2" fill="none" vector-effect="non-scaling-stroke"/>`+
+    `<g class="sums" fill="var(--sum)" font-size="17" font-weight="600" font-family="ui-rounded,system-ui,sans-serif">${labels}</g>`;
 }
 
 // ---------- derived info ----------
@@ -539,9 +625,11 @@ function render(){
   padEl.classList.toggle('notemode',noteMode);
   $('#modeNormal').classList.toggle('on',!noteMode);$('#modeNote').classList.toggle('on',noteMode);
   $('#mistakes').textContent=S.mistakes;
+  renderBest();
   document.querySelectorAll('#diffs button').forEach(b=>b.classList.toggle('on',b.dataset.d===S.diff));
   renderCage();
 }
+function renderBest(){const b=LGT.best(S.diff);$('#bestStat').hidden=b==null;if(b!=null)$('#best').textContent=LGT.format(b)}
 function renderCage(){
   const c=S.cages[S.cageOf[cursor]],v=S.values;
   let placed=0,filled=0,s=0;for(const i of c.cells)if(v[i]){placed|=1<<v[i];filled++;s+=v[i]}
@@ -576,7 +664,12 @@ function afterChange(){
   render();
   if(S.values.every((x,i)=>x===S.solution[i])){
     S.done=true;$('#board').classList.add('win');
-    setTimeout(()=>{$('#winText').textContent=`${DIFF_LABEL[S.diff]} · 時間 ${fmt(S.elapsed)} · 錯誤 ${S.mistakes}`;$('#winCover').classList.add('show')},700);
+    // S.done is saved right below and a done save is never restored, so this fires once per puzzle
+    const hints=S.hinted.filter(Boolean).length;
+    const r=LGT.addRecord({value:S.elapsed,variant:S.diff,won:true,detail:`錯誤 ${S.mistakes}`+(hints?` · 提示 ${hints} 次`:'')});
+    renderBest();
+    const line=`${DIFF_LABEL[S.diff]} · 時間 ${fmt(S.elapsed)} · 錯誤 ${S.mistakes}`+(hints?` · 提示 ${hints}`:'');
+    setTimeout(()=>{$('#winText').innerHTML=(r.isBest?'<span class="rec">新紀錄！</span>':r.best!=null?`<span class="rec">最快 ${LGT.format(r.best)}</span>`:'')+line;$('#winCover').classList.add('show')},700);
   }
   save();
 }
@@ -644,12 +737,14 @@ addEventListener('pointerup',()=>dragging=false);
 
 // ---------- keyboard ----------
 addEventListener('keydown',e=>{
+  if(LGT.isOpen())return;
   if($('#help').classList.contains('show')){if(e.key==='Escape'||e.key==='?')$('#help').classList.remove('show');return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase();
   if(mod&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
   if(mod&&k==='y'){e.preventDefault();redo();return}
   if(mod||e.altKey&&!/^(Digit|Numpad)/.test(e.code))return;
   if(k==='p'){togglePause();return}
+  if(k==='t'){LGT.cycleTheme();return}
   if(e.key==='?'){$('#help').classList.add('show');return}
   if(paused||!S)return;
   const dm=e.code.match(/^(?:Digit|Numpad)([0-9])$/);
@@ -678,16 +773,18 @@ function togglePause(){if(S&&!S.done)setPaused(!paused)}
 // auto-pause when leaving the tab/window; only auto-resume a pause we started ourselves
 let autoPaused=false;
 function autoPause(){if(S&&!S.done&&!paused){setPaused(true);autoPaused=true}}
-function autoResume(){if(autoPaused)setPaused(false)}
+function autoResume(){if(autoPaused&&!recOpen)setPaused(false)}
 document.addEventListener('visibilitychange',()=>document.hidden?autoPause():autoResume());
 addEventListener('blur',autoPause);addEventListener('focus',autoResume);
+// the records panel counts as leaving the board: pause while it's open
+let recOpen=false;
+addEventListener('lgt:records-open',()=>{recOpen=true;autoPause()});
+addEventListener('lgt:records-close',()=>{recOpen=false;autoResume()});
 let toastT;function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1400)}
 function save(){if(S)localStorage.setItem(SAVE_KEY,JSON.stringify(S))}
 function saveOpts(){localStorage.setItem(SAVE_KEY+'-opts',JSON.stringify(opts))}
-function applyTheme(){document.documentElement.classList.toggle('light',opts.theme==='light')}
 
 $('#pauseBtn').onclick=togglePause;$('#resumeBtn').onclick=()=>setPaused(false);
-$('#themeBtn').onclick=()=>{opts.theme=opts.theme==='light'?'dark':'light';applyTheme();saveOpts()};
 $('#helpBtn').onclick=()=>$('#help').classList.add('show');
 $('#help').onclick=e=>{if(e.target.id==='help')$('#help').classList.remove('show')};
 $('#newBtn').onclick=()=>newGame(opts.diff);$('#winNew').onclick=()=>newGame(opts.diff);
@@ -702,7 +799,6 @@ function fitChrome(){const h=document.getElementById('global-header');
   document.documentElement.style.setProperty('--chrome',(h?h.offsetHeight:0)+'px')}
 addEventListener('load',fitChrome);addEventListener('resize',fitChrome);
 
-applyTheme();
 try{const saved=JSON.parse(localStorage.getItem(SAVE_KEY));
   if(saved&&!saved.done&&saved.cages){S=saved;sel=new Set([cursor]);drawSvg();render();$('#timer').textContent=fmt(S.elapsed)}
   else newGame(opts.diff);

@@ -34,8 +34,35 @@ class Tetromino {
     }
     
     drawBlock(ctx, x, y, typeId) {
-        const color = NEON_COLORS[typeId];
-        
+        const color = PAL.colors[typeId];
+
+        if (PAL.style === 'soft') {
+            // dark / light: rounded tile with a small gloss pill
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = color;
+            roundBox(ctx, x + 0.05, y + 0.05, 0.9, 0.9, 0.2);
+            ctx.fillStyle = PAL.edge;
+            ctx.fillRect(x + 0.2, y + 0.78, 0.6, 0.07);
+            ctx.fillStyle = PAL.hi;
+            roundBox(ctx, x + 0.18, y + 0.14, 0.64, 0.14, 0.07);
+            return;
+        }
+        if (PAL.style === 'neo') {
+            // neubrutalism: flat fill, thick black outline, hard inner shade
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 0.04, y + 0.04, 0.92, 0.92);
+            ctx.fillStyle = PAL.edge;
+            ctx.fillRect(x + 0.04, y + 0.78, 0.92, 0.18);
+            ctx.fillRect(x + 0.78, y + 0.04, 0.18, 0.92);
+            ctx.fillStyle = PAL.hi;
+            ctx.fillRect(x + 0.2, y + 0.2, 0.18, 0.18);
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 0.09;
+            ctx.strokeRect(x + 0.085, y + 0.085, 0.83, 0.83);
+            return;
+        }
+
         ctx.fillStyle = color;
         // Reset shadow for inner block to avoid blurry performance issues
         ctx.shadowBlur = 0;
@@ -57,4 +84,11 @@ class Tetromino {
         this.y = p.y;
         this.shape = p.shape;
     }
+}
+
+function roundBox(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+    else ctx.rect(x, y, w, h);
+    ctx.fill();
 }

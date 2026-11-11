@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="version" content="1.1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake - LGT Games</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -25,6 +26,7 @@
 
         <div class="header-bottom">
             <p class="desc">Devour the glowing databits. Don't crash into the mainframe walls or yourself.</p>
+            <span data-lgt-kit></span>
         </div>
 
         <div class="game-container">
@@ -32,6 +34,7 @@
             
             <div id="game-message" class="game-message">
                 <h2 id="msg-text">SYSTEM READY</h2>
+                <p id="msg-sub" class="msg-sub"></p>
                 <div class="msg-actions">
                     <button id="start-btn" class="primary-btn">Initialize</button>
                     <button id="retry-btn" class="primary-btn hidden">Reboot</button>
@@ -44,6 +47,7 @@
         </div>
     </div>
 
+    <script src="/shared/lgt-kit.js"></script>
     <script src="js/game.js"></script>
     <script src="/shared/layout.js"></script>
 </body>

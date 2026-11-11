@@ -16,6 +16,14 @@ const resetBtn = document.getElementById('reset-btn');
 const statusIcon = document.getElementById('status-icon');
 const overlay = document.getElementById('game-over-overlay');
 const overlayText = document.getElementById('overlay-text');
+const overlaySub = document.getElementById('overlay-sub');
+const bestTimeEl = document.getElementById('best-time');
+let lastLongPress = 0;
+
+function updateBest() {
+    const b = window.LGT ? LGT.best() : null;
+    bestTimeEl.textContent = b == null ? '—' : LGT.format(b);
+}
 
 function initGame() {
     isFirstClick = true;
@@ -27,7 +35,9 @@ function initGame() {
     timerEl.textContent = '000';
     
     overlay.classList.add('hidden');
+    overlaySub.textContent = '';
     setStatusIcon('smile');
+    updateBest();
     
     grid = Array.from({length: ROWS}, (_, r) => 
         Array.from({length: COLS}, (_, c) => ({
@@ -60,6 +70,8 @@ function renderGrid() {
             cellEl.addEventListener('click', () => handleLeftClick(r, c));
             cellEl.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
+                // Android also fires contextmenu on long-press; the touch timer already flagged it
+                if (Date.now() - lastLongPress < 1000) return;
                 handleRightClick(r, c);
             });
             
@@ -67,6 +79,7 @@ function renderGrid() {
             cellEl.addEventListener('touchstart', (e) => {
                 if(e.touches.length > 1) return;
                 longPressTimer = setTimeout(() => {
+                    lastLongPress = Date.now();
                     handleRightClick(r, c);
                 }, 400); 
             }, {passive: true});
@@ -166,7 +179,7 @@ function revealCell(r, c) {
     cell.el.classList.add('revealed');
     
     if (cell.isMine) {
-        cell.el.classList.add('mine');
+        cell.el.classList.add('mine', 'exploded');
         cell.el.innerHTML = '<i data-lucide="skull" style="width:20px;height:20px;"></i>';
         endGame(false);
         return;
@@ -211,7 +224,7 @@ function endGame(isWin) {
     if (isWin) {
         setStatusIcon('sunglasses');
         overlayText.textContent = "YOU WIN!";
-        overlayText.style.color = "#22c55e"; 
+        overlayText.style.color = "var(--win)";
         
         grid.forEach(row => row.forEach(cell => {
             if(cell.isMine && !cell.isFlagged) {
@@ -221,7 +234,7 @@ function endGame(isWin) {
     } else {
         setStatusIcon('frown');
         overlayText.textContent = "GAME OVER";
-        overlayText.style.color = "#ef4444"; 
+        overlayText.style.color = "var(--lose)";
         
         // Reveal all mines and incorrect flags
         grid.forEach(row => row.forEach(cell => {
@@ -229,15 +242,40 @@ function endGame(isWin) {
                 cell.el.classList.add('revealed', 'mine');
                 cell.el.innerHTML = '<i data-lucide="bomb" style="width:20px;height:20px;"></i>';
             } else if (!cell.isMine && cell.isFlagged) {
-                cell.el.classList.add('revealed');
-                cell.el.innerHTML = '<i data-lucide="x" style="width:20px;height:20px;color:#ef4444;"></i>';
+                cell.el.classList.add('revealed', 'wrong');
+                cell.el.innerHTML = '<i data-lucide="x" style="width:20px;height:20px;"></i>';
             }
         }));
     }
     
+    recordResult(isWin);
     overlay.classList.remove('hidden');
     if (window.lucide) lucide.createIcons();
 }
+
+// Local records (shared/lgt-kit.js): one entry per finished game, time in seconds
+function recordResult(isWin) {
+    if (!window.LGT) return;
+    const prev = LGT.best();
+    const res = LGT.addRecord({
+        value: timer,
+        won: isWin,
+        detail: isWin ? `${ROWS}×${COLS} · ${MINES} 顆地雷` : '踩到地雷'
+    });
+    const t = '用時 ' + LGT.format(timer);
+    if (isWin && res.isBest) {
+        overlaySub.innerHTML = t + '　<span class="rec">新紀錄！</span>';
+    } else {
+        const b = isWin ? res.best : prev;
+        overlaySub.textContent = t + (b == null ? '' : '　·　最快 ' + LGT.format(b));
+    }
+    updateBest();
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || (window.LGT && LGT.isOpen())) return;
+    if (e.key === 't' || e.key === 'T') LGT.cycleTheme();
+});
 
 resetBtn.addEventListener('click', initGame);
 

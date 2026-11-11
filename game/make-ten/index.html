@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="version" content="1.1.0">
+<meta name="version" content="1.2.0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>湊十 · Make Ten</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
   --text:#e6e8ee;--muted:#8b93a7;--shadow:0 10px 40px rgba(0,0,0,.45);
   --d1:#8fb0ff;--d2:#7fd6ff;--d3:#6ee7c8;--d4:#9be37a;--d5:#e8e06a;--d6:#ffc46b;--d7:#ff9f6b;--d8:#ff8a9a;--d9:#e39bff;
 }
-:root.light{
+:root[data-theme="light"]{
   --bg:#eef0f6;--panel:#ffffff;--panel2:#f5f6fa;--border:#e1e4ec;
   --tile:#ffffff;--tileedge:#cfd4e2;--slot:#e4e7ef;
   --selbg:#c7d1ff;--okbg:#3ccf8e;--overbg:#ffc2ca;
@@ -86,57 +86,42 @@ main{display:flex;justify-content:center}
 .hint{text-align:center;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}
 kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:1px 6px;border-radius:5px;border:1px solid var(--border);background:var(--panel2);color:var(--muted)}
 /* portal chrome: keep the footer in page flow so it doesn't eat board height */
-/* ---------- theme menu ---------- */
-.themewrap{position:relative}
-.thememenu{position:absolute;right:0;top:calc(100% + 8px);z-index:100000;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;min-width:140px}
-.thememenu[hidden]{display:none}
-.thememenu button{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:14px;white-space:nowrap;color:var(--text)}
-.thememenu button:hover{background:var(--panel2)}
-.thememenu button[aria-checked="true"]{color:var(--accent);font-weight:700}
-.thememenu button[aria-checked="true"]::after{content:"✓";margin-left:auto}
-.tsw{width:22px;height:22px;border-radius:6px;flex:none;border:1px solid rgba(128,128,128,.45)}
-.tsw-dark{background:linear-gradient(135deg,#161922 50%,#7c8cff 50%)}
-.tsw-light{background:linear-gradient(135deg,#fff 50%,#4f5bff 50%)}
-.tsw-neo{background:#c9b8ff;border:2px solid #111;box-shadow:2px 2px 0 #111;border-radius:4px}
-
 /* ---------- neubrutalism theme ---------- */
-:root.neo{--bg:#c9b8ff;--panel:#ffffff;--panel2:#f1ecff;--border:#111;--text:#111;--muted:#2e2a45;
+:root[data-theme="neo"]{--bg:#c9b8ff;--panel:#ffffff;--panel2:#f1ecff;--border:#111;--text:#111;--muted:#2e2a45;
   --accent:#3a49e6;--accent2:#3a49e6;--err:#e8283c;--ok:#0f8a4f;--warn:#b35f00;--shadow:6px 6px 0 #111}
-:root.neo .logo,:root.neo .cover h2,:root.neo .stat b,:root.neo .timerow b{font-family:"Archivo Black","Noto Sans TC","PingFang TC",sans-serif;font-weight:400}
-.neo .logo .mark{background:#ff70a6;color:#111;border:2.5px solid #111;border-radius:8px;box-shadow:2px 2px 0 #111}
-.neo .iconbtn{background:#fff;border:2.5px solid #111;border-radius:8px;box-shadow:3px 3px 0 #111;transition:transform .08s,box-shadow .08s}
-.neo .iconbtn:hover{border-color:#111;transform:translate(-1px,-1px);box-shadow:4px 4px 0 #111}
-.neo .iconbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
-.neo .iconbtn.on{background:#ffe14d;color:#111;border-color:#111}
-.neo .primary{background:#ffe14d;color:#111;border:3px solid #111;border-radius:8px;box-shadow:4px 4px 0 #111;font-family:"Archivo Black","Noto Sans TC","PingFang TC",sans-serif;font-weight:400;transition:transform .08s,box-shadow .08s}
-.neo .primary:hover{filter:none;transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}
-.neo .primary:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
-.neo .timebar{height:16px;border:3px solid #111;border-radius:6px;background:#fff}
-.neo .timebar i{background:#4cc9f0}
-.neo .timebar.low i{background:#ff5c5c}
-.neo .board{border:3px solid #111;border-radius:12px;background:#f1ecff;box-shadow:6px 6px 0 #111}
-.neo .cover .card{border:3px solid #111;border-radius:12px;box-shadow:8px 8px 0 #111}
-.neo .cover .rec{color:#c2410c}
-.neo kbd{border:1.5px solid #111;background:#fff;color:#111}
-.neo .thememenu{border:3px solid #111;border-radius:10px;box-shadow:5px 5px 0 #111}
-.neo .thememenu button[aria-checked="true"]{color:#111;background:#ffe14d}
-.neo .cell{padding:calc(var(--cell)*.08)}
-.neo .t{background:#fff;border:max(2px,calc(var(--cell)*.055)) solid #111;border-radius:7px;box-shadow:3px 3px 0 #111;color:#111;font-family:"Archivo Black",sans-serif;font-weight:400}
-.neo .cell.sel .t{background:#c7d0ff;transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
-.neo .board.ok .cell.sel .t{background:#7cf29a;color:#111}
-.neo .board.over .cell.sel .t{background:#ff9aa2}
-.neo .cell::before{inset:calc(var(--cell)*.24);background:transparent;border:2px dashed rgba(17,17,17,.22);border-radius:6px}
-.neo .selbox{border:3px dashed #111;background:rgba(255,255,255,.25);border-radius:6px}
-.neo .board.ok .selbox{border-style:solid;border-color:#111;background:rgba(124,242,154,.25)}
-.neo .board.over .selbox{border-color:#e8283c}
-.neo .sumtag{border:3px solid #111;border-radius:6px;box-shadow:3px 3px 0 #111;font-family:"Archivo Black",sans-serif;font-weight:400;color:#111}
-.neo .board.ok .sumtag{background:#7cf29a;color:#111;border-color:#111}
-.neo .board.over .sumtag{background:#ff9aa2;color:#111}
-.neo .float{color:#111;font-family:"Archivo Black",sans-serif;font-weight:400;text-shadow:2px 2px 0 #7cf29a}
+:root[data-theme="neo"] .logo,:root[data-theme="neo"] .cover h2,:root[data-theme="neo"] .stat b,:root[data-theme="neo"] .timerow b{font-family:"Archivo Black","Noto Sans TC","PingFang TC",sans-serif;font-weight:400}
+[data-theme="neo"] .logo .mark{background:#ff70a6;color:#111;border:2.5px solid #111;border-radius:8px;box-shadow:2px 2px 0 #111}
+[data-theme="neo"] .iconbtn{background:#fff;border:2.5px solid #111;border-radius:8px;box-shadow:3px 3px 0 #111;transition:transform .08s,box-shadow .08s}
+[data-theme="neo"] .iconbtn:hover{border-color:#111;transform:translate(-1px,-1px);box-shadow:4px 4px 0 #111}
+[data-theme="neo"] .iconbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+[data-theme="neo"] .iconbtn.on{background:#ffe14d;color:#111;border-color:#111}
+[data-theme="neo"] .primary{background:#ffe14d;color:#111;border:3px solid #111;border-radius:8px;box-shadow:4px 4px 0 #111;font-family:"Archivo Black","Noto Sans TC","PingFang TC",sans-serif;font-weight:400;transition:transform .08s,box-shadow .08s}
+[data-theme="neo"] .primary:hover{filter:none;transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}
+[data-theme="neo"] .primary:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
+[data-theme="neo"] .timebar{height:16px;border:3px solid #111;border-radius:6px;background:#fff}
+[data-theme="neo"] .timebar i{background:#4cc9f0}
+[data-theme="neo"] .timebar.low i{background:#ff5c5c}
+[data-theme="neo"] .board{border:3px solid #111;border-radius:12px;background:#f1ecff;box-shadow:6px 6px 0 #111}
+[data-theme="neo"] .cover .card{border:3px solid #111;border-radius:12px;box-shadow:8px 8px 0 #111}
+[data-theme="neo"] .cover .rec{color:#c2410c}
+[data-theme="neo"] kbd{border:1.5px solid #111;background:#fff;color:#111}
+[data-theme="neo"] .cell{padding:calc(var(--cell)*.08)}
+[data-theme="neo"] .t{background:#fff;border:max(2px,calc(var(--cell)*.055)) solid #111;border-radius:7px;box-shadow:3px 3px 0 #111;color:#111;font-family:"Archivo Black",sans-serif;font-weight:400}
+[data-theme="neo"] .cell.sel .t{background:#c7d0ff;transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+[data-theme="neo"] .board.ok .cell.sel .t{background:#7cf29a;color:#111}
+[data-theme="neo"] .board.over .cell.sel .t{background:#ff9aa2}
+[data-theme="neo"] .cell::before{inset:calc(var(--cell)*.24);background:transparent;border:2px dashed rgba(17,17,17,.22);border-radius:6px}
+[data-theme="neo"] .selbox{border:3px dashed #111;background:rgba(255,255,255,.25);border-radius:6px}
+[data-theme="neo"] .board.ok .selbox{border-style:solid;border-color:#111;background:rgba(124,242,154,.25)}
+[data-theme="neo"] .board.over .selbox{border-color:#e8283c}
+[data-theme="neo"] .sumtag{border:3px solid #111;border-radius:6px;box-shadow:3px 3px 0 #111;font-family:"Archivo Black",sans-serif;font-weight:400;color:#111}
+[data-theme="neo"] .board.ok .sumtag{background:#7cf29a;color:#111;border-color:#111}
+[data-theme="neo"] .board.over .sumtag{background:#ff9aa2;color:#111}
+[data-theme="neo"] .float{color:#111;font-family:"Archivo Black",sans-serif;font-weight:400;text-shadow:2px 2px 0 #7cf29a}
 html body #global-footer{position:static}
 html body{padding-bottom:0!important}
 @media (max-width:600px){header{gap:8px;flex-wrap:nowrap}.logo{font-size:17px;white-space:nowrap}.stat{white-space:nowrap}.iconbtn{width:32px;height:32px;flex:none}.stat{font-size:12px;gap:4px}.stat b{font-size:17px}.logo .en{display:none}.app{padding:12px 10px}.wrap{padding:0 0 10px}.hint .k{display:none}}
-@media (max-width:400px){.stat.best{display:none}}
+@media (max-width:400px){.stat.best{display:none}.logo{font-size:0;gap:0}}
 </style>
 </head>
 <body>
@@ -148,12 +133,7 @@ html body{padding-bottom:0!important}
     <div class="stat best">最佳 <b id="best">0</b></div>
     <button class="iconbtn" id="pauseBtn" title="暫停 (P)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
     <button class="iconbtn" id="restartBtn" title="新的一局 (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
-    <div class="themewrap"><button class="iconbtn" id="themeBtn" title="主題 (T)" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.3" fill="currentColor"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor"/><circle cx="16" cy="10" r="1.3" fill="currentColor"/><path d="M12 21a2.5 2.5 0 0 1 0-5h2a3 3 0 0 0 3-3"/></svg></button>
-    <div class="thememenu" id="themeMenu" role="menu" aria-label="主題" hidden>
-      <button role="menuitemradio" data-theme="dark"><i class="tsw tsw-dark"></i>深色</button>
-      <button role="menuitemradio" data-theme="light"><i class="tsw tsw-light"></i>淺色</button>
-      <button role="menuitemradio" data-theme="neo"><i class="tsw tsw-neo"></i>新粗獷</button>
-    </div></div>
+    <span data-lgt-kit></span>
   </header>
   <main>
     <div class="wrap" id="wrap">
@@ -172,6 +152,7 @@ html body{padding-bottom:0!important}
     <span class="k"><kbd>P</kbd> 暫停　<kbd>R</kbd> 新的一局　<kbd>T</kbd> 換主題</span>
   </div>
 </div>
+<script src="/shared/lgt-kit.js"></script>
 <script>
 'use strict';
 const COLS=17,ROWS=10,TARGET=10,LIMIT=120000,KEY='make-ten';
@@ -180,6 +161,8 @@ const board=$('#board'),wrap=$('#wrap'),selbox=$('#selbox'),sumtag=$('#sumtag'),
 const opts=Object.assign({theme:'dark',best:0},readJSON(KEY+'-opts'));
 function readJSON(k){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return {}}}
 function saveOpts(){try{localStorage.setItem(KEY+'-opts',JSON.stringify(opts))}catch(e){}}
+LGT.init({game:'make-ten',title:'湊十',themes:['dark','light','neo'],buttonClass:'iconbtn',legacyTheme:opts.theme,records:{kind:'score',legacyBest:opts.best}});
+addEventListener('lgt:records-open',()=>pause());
 
 let grid=[],cells=[],score=0,state='idle',used=0,segStart=0,transposed=false,cellPx=40,drag=null,selected=[];
 
@@ -276,7 +259,7 @@ function drawTime(){
   $('#timebar').classList.toggle('low',low);$('#timeTxtWrap').classList.toggle('low',low);
 }
 function tick(){if(state!=='run')return;drawTime();if(left()<=0){end('time');return}requestAnimationFrame(tick)}
-function hud(){$('#score').textContent=score;$('#best').textContent=opts.best}
+function hud(){$('#score').textContent=score;$('#best').textContent=LGT.best()??0}
 function setCover(html){coverCard.innerHTML=html;cover.classList.toggle('show',!!html);board.classList.toggle('blur',!!html&&state!=='over')}
 function idle(){
   state='idle';used=0;score=0;drag=null;showSel();newBoard();paint();hud();drawTime();
@@ -288,28 +271,21 @@ function pause(){if(state!=='run')return;used+=performance.now()-segStart;state=
 function end(why){
   if(state==='run')used+=performance.now()-segStart;
   state='over';drag=null;showSel();drawTime();
-  const rec=score>opts.best;if(rec){opts.best=score;saveOpts()}hud();
+  const rec=LGT.addRecord({value:score,detail:`${ROWS*COLS} 顆消了 ${score} 顆`}).isBest&&score>0;hud();
   const title={time:'時間到',stuck:'沒有能湊 10 的組合了',clear:'全部清空！'}[why];
   const extra=why==='clear'?`<p>還剩 ${Math.ceil(left()/1000)} 秒</p>`:'';
-  setCover(`<h2>${title}</h2><div class="big">${score}</div><p>${rec?'<span class="rec">新紀錄！</span>':'最佳 '+opts.best}　·　${ROWS*COLS} 顆中消了 ${score} 顆</p>${extra}<button class="primary" data-act="again">再玩一局（Enter）</button>`);
+  setCover(`<h2>${title}</h2><div class="big">${score}</div><p>${rec?'<span class="rec">新紀錄！</span>':'最佳 '+LGT.format(LGT.best())}　·　${ROWS*COLS} 顆中消了 ${score} 顆</p>${extra}<button class="primary" data-act="again">再玩一局（Enter）</button>`);
 }
 cover.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a)return;if(a.dataset.act==='start')start();else{idle();start()}});
 $('#pauseBtn').onclick=()=>state==='run'?pause():start();
 $('#restartBtn').onclick=idle;
-const THEMES=['dark','light','neo'];if(!THEMES.includes(opts.theme))opts.theme='dark';
-function setTheme(t){opts.theme=t;applyTheme();saveOpts()}
-function applyTheme(){const r=document.documentElement;r.classList.toggle('light',opts.theme==='light');r.classList.toggle('neo',opts.theme==='neo');
-  document.querySelectorAll('#themeMenu [data-theme]').forEach(b=>b.setAttribute('aria-checked',b.dataset.theme===opts.theme))}
-$('#themeBtn').onclick=()=>{const m=$('#themeMenu');m.hidden=!m.hidden;$('#themeBtn').setAttribute('aria-expanded',!m.hidden)};
-$('#themeMenu').onclick=e=>{const b=e.target.closest('[data-theme]');if(!b)return;setTheme(b.dataset.theme);$('#themeMenu').hidden=true;$('#themeBtn').setAttribute('aria-expanded','false')};
-document.addEventListener('pointerdown',e=>{if(!e.target.closest('.themewrap')){$('#themeMenu').hidden=true;$('#themeBtn').setAttribute('aria-expanded','false')}});
 addEventListener('keydown',e=>{
-  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.metaKey||e.ctrlKey||e.altKey||LGT.isOpen())return;
   const k=e.key.toLowerCase();
   if(k==='enter'||k===' '){e.preventDefault();if(state==='over'){idle();start()}else if(state!=='run')start()}
   else if(k==='p'||k==='escape'){state==='run'?pause():state==='pause'&&start()}
   else if(k==='r')idle();
-  else if(k==='t')setTheme(THEMES[(THEMES.indexOf(opts.theme)+1)%THEMES.length]);
+  else if(k==='t')LGT.cycleTheme();
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 addEventListener('blur',pause);
@@ -317,7 +293,7 @@ addEventListener('resize',layout);
 addEventListener('load',layout);
 document.addEventListener('DOMContentLoaded',()=>setTimeout(layout,0));
 
-applyTheme();build();idle();layout();
+build();idle();layout();
 </script>
 <script src="/shared/layout.js"></script>
 </body>

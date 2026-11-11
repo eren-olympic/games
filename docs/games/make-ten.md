@@ -15,7 +15,10 @@
 7. **Mobile**: On portrait screens under 760px the board is transposed to 10 × 17; the rule is unaffected because rectangles stay rectangles.
 
 ## Controls
-`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board · `T` next theme
+`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board · `T` next theme · trophy button opens records
 
 ## Themes
-The palette button in the header opens a menu: 深色 (dark, default), 淺色 (light), 新粗獷 (neubrutalism). The choice is saved in localStorage. Neubrutalism loads Archivo Black from Google Fonts for numerals and headings.
+Three themes from the shared kit (`/shared/lgt-kit.js`): 深色 (dark, default), 淺色 (light), 新粗獷 (neubrutalism). The palette button in the header opens the menu; `T` cycles. Stored per game in localStorage `lgt:<game>:theme`.
+
+## Records
+Score records via the shared kit: best score plus the last 10 games with date and tiles cleared, opened from the trophy button (the game pauses while it is open). Stored only in this browser (`lgt:<game>:records`). The best score from v1.0–1.1 (`<game>-opts.best`) is carried over once.

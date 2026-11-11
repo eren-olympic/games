@@ -9,6 +9,11 @@
     --board-size: 400px;
     --cell-size: 85px;
     --gap-size: 12px;
+
+    --font: 'Outfit', sans-serif;
+    /* kit (theme menu / records panel) in the original palette */
+    --kit-surface: #faf8ef; --kit-surface2: #eee4da; --kit-text: #43525d; --kit-muted: #8f7a66;
+    --kit-border: #d8ccbf; --kit-accent: #3b82f6; --kit-good: #3b9a6b; --kit-shadow: 0 14px 44px rgba(67, 82, 93, 0.25);
 }
 
 * {
@@ -16,7 +21,7 @@
     margin: 0;
     padding: 0;
     user-select: none;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font);
 }
 
 body {
@@ -85,12 +90,30 @@ body {
     justify-content: space-between;
     align-items: flex-end;
     margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 12px 10px;
 }
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+/* kit buttons (records / theme) in the original look: same slate as the score boxes */
+.actions .lgt-btn {
+    width: 44px; height: 44px;
+    background: #4a5d6a; color: #fff; border: none; border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.actions .lgt-btn svg { width: 20px; height: 20px; }
+.actions .lgt-btn:hover { border-color: transparent; background: #5b707e; }
 
 .desc {
     font-size: 1.1rem;
     color: #8f7a66;
-    max-width: 60%;
+    max-width: none;
 }
 
 .primary-btn {
@@ -221,6 +244,15 @@ body {
     gap: 20px;
 }
 
+.game-message .msg-sub {
+    margin-top: -6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #8f7a66;
+}
+.game-message .msg-sub.is-best { color: #e8590c; }
+.game-message .msg-sub.hidden { display: none; }
+
 .game-message.hidden {
     display: none;
 }
@@ -244,14 +276,217 @@ body {
 @media (max-width: 450px) {
     :root {
         --board-size: 310px;
-        --cell-size: 61px;
+        --cell-size: 65px; /* (310 - 2*10 - 3*10) / 4; was 61px, which left tiles off-grid */
         --gap-size: 10px;
     }
     .title { font-size: 3rem; }
-    .desc { font-size: 1rem; max-width: 60%; }
+    .desc { font-size: 1rem; max-width: none; }
     .game-message h2 { font-size: 3rem; }
     .tile { font-size: 2rem; }
     .tile-128 .tile-inner, .tile-256 .tile-inner, .tile-512 .tile-inner { font-size: 1.6rem; }
     .tile-1024 .tile-inner, .tile-2048 .tile-inner { font-size: 1.4rem; }
     .primary-btn { padding: 10px 18px; font-size: 1rem; }
+    .actions .lgt-btn { width: 40px; height: 40px; }
+    .actions { gap: 8px; }
+    /* keep five/six-digit scores and 4096+ tiles inside a phone-width layout */
+    .header-top { gap: 8px; }
+    .title { font-size: 2.6rem; }
+    .scores { gap: 6px; min-width: 0; }
+    .score-box { padding: 6px 10px; }
+    .score-value { font-size: 1.15rem; }
+    .score-label { font-size: 0.7rem; }
+    .desc { text-wrap: balance; }
+    .tile-super .tile-inner { font-size: 1.2rem; }
+}
+
+/* =====================================================================
+   Themes (set by /shared/lgt-kit.js on <html data-theme>):
+   original = everything above, unchanged. dark / light = site family look.
+   neo = neubrutalism. Tiles in these themes read --tN (background),
+   --tN-f (number colour) and --tN-s (shadow) so each ramp is one block.
+   ===================================================================== */
+:root[data-theme="dark"],
+:root[data-theme="light"] {
+    --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+}
+:root[data-theme="dark"] {
+    --bg-color: #0e1016; --text-dark: #e6e8ee;
+    --panel: #161922; --panel2: #1c202b; --border: #262b38; --muted: #8b93a7;
+    --accent: #7c8cff; --accent2: #a78bfa;
+    --grid-bg: var(--panel); --cell-empty: var(--panel2);
+    --kit-surface: #161922; --kit-surface2: #1c202b; --kit-text: #e6e8ee; --kit-muted: #8b93a7;
+    --kit-border: #262b38; --kit-accent: #7c8cff; --kit-good: #3fae7f; --kit-shadow: 0 14px 44px rgba(0,0,0,.5);
+    --t2: #2a2f3d;  --t2-f: #c9cedb;
+    --t4: #383f55;  --t4-f: #e6e8ee;
+    --t8: #1d8585;  --t16: #2a84cc; --t32: #4f5fe0; --t64: #7d55ec; --t128: #ad48cf; --t256: #d8488f;
+    --t512: #f0705f; --t512-f: #1a1020;
+    --t1024: #f5a03f; --t1024-f: #1f1405;
+    --t2048: #f7c948; --t2048-f: #1f1605; --t2048-s: 0 0 24px 4px rgba(247, 201, 72, .45);
+    --tsuper: linear-gradient(135deg, #7c8cff, #a78bfa); --tsuper-s: 0 0 24px 4px rgba(124, 140, 255, .45);
+    --tile-f: #ffffff; --tile-s: 0 2px 0 rgba(0,0,0,.35);
+}
+:root[data-theme="light"] {
+    --bg-color: #eef0f6; --text-dark: #1b2133;
+    --panel: #ffffff; --panel2: #eef0f6; --border: #e1e4ec; --muted: #6b7389;
+    --accent: #4f5bff; --accent2: #8b5cf6;
+    --grid-bg: var(--panel); --cell-empty: var(--panel2);
+    --kit-surface: #ffffff; --kit-surface2: #f2f3f8; --kit-text: #1b2133; --kit-muted: #5f6680; --kit-border: #e1e4ec; --kit-accent: #4f5bff;
+    --t2: #e3e7f5;  --t2-f: #3a4360;
+    --t4: #c9d1f0;  --t4-f: #1b2133;
+    --t8: #7fd6c6;  --t8-f: #0f2b27;
+    --t16: #74b9f2; --t16-f: #0d2238;
+    --t32: #4f5bff; --t64: #7a4fe8; --t128: #b23fc9; --t256: #dd3f7c;
+    --t512: #f2704f; --t512-f: #2a0f05;
+    --t1024: #f6a33b; --t1024-f: #2a1600;
+    --t2048: #f5c518; --t2048-f: #2a1a00; --t2048-s: 0 0 22px 3px rgba(245, 197, 24, .55);
+    --tsuper: #1b2133;
+    --tile-f: #ffffff; --tile-s: 0 2px 0 rgba(27, 33, 51, .12);
+}
+:root[data-theme="neo"] {
+    --font: "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+    --bg-color: var(--neo-bg); --text-dark: #111;
+    --grid-bg: #fff; --cell-empty: var(--neo-panel2);
+    --t2: #ffffff; --t4: #ffe9c7; --t8: var(--neo-green); --t16: var(--neo-cyan); --t32: var(--neo-orange);
+    --t64: var(--neo-red); --t128: var(--neo-pink);
+    --t256: var(--neo-purple); --t256-f: #fff;
+    --t512: var(--neo-blue);   --t512-f: #fff;
+    --t1024: #111;             --t1024-f: var(--neo-yellow); --t1024-s: 4px 4px 0 var(--neo-pink);
+    --t2048: var(--neo-yellow);
+    --tsuper: #0f8a4f;         --tsuper-f: #fff;
+    --tile-f: #111; --tile-s: 4px 4px 0 #111;
+}
+
+/* --- shared structure for the three new themes --- */
+:root:not([data-theme="original"]) body { transition: background .25s; }
+/* header as wide as the board (the original keeps its 20px-narrower header) */
+:root:not([data-theme="original"]) .container { width: calc(var(--board-size) + 20px); }
+:root:not([data-theme="original"]) .header-top { gap: 10px; }
+:root:not([data-theme="original"]) .score-box { padding: 8px 14px; min-width: 84px; }
+/* bordered boards: shrink padding by the border so cells stay exactly --cell-size */
+:root[data-theme="dark"] .game-container, :root[data-theme="light"] .game-container { padding: calc(var(--gap-size) - 1px); }
+:root[data-theme="dark"] .tile-container, :root[data-theme="light"] .tile-container { top: calc(var(--gap-size) - 1px); left: calc(var(--gap-size) - 1px); }
+:root[data-theme="neo"] .game-container { padding: calc(var(--gap-size) - 3px); }
+:root[data-theme="neo"] .tile-container { top: calc(var(--gap-size) - 3px); left: calc(var(--gap-size) - 3px); }
+/* rounded system font is wider than Outfit */
+:root[data-theme="dark"] .tile-128 .tile-inner, :root[data-theme="dark"] .tile-256 .tile-inner, :root[data-theme="dark"] .tile-512 .tile-inner,
+:root[data-theme="light"] .tile-128 .tile-inner, :root[data-theme="light"] .tile-256 .tile-inner, :root[data-theme="light"] .tile-512 .tile-inner { font-size: 2.1rem; }
+:root[data-theme="dark"] .tile-1024 .tile-inner, :root[data-theme="dark"] .tile-2048 .tile-inner,
+:root[data-theme="light"] .tile-1024 .tile-inner, :root[data-theme="light"] .tile-2048 .tile-inner { font-size: 1.6rem; }
+:root[data-theme="dark"] .tile-super .tile-inner, :root[data-theme="light"] .tile-super .tile-inner { font-size: 1.45rem; }
+:root[data-theme="dark"] .title,
+:root[data-theme="light"] .title { color: var(--text-dark); font-weight: 800; letter-spacing: -1px; }
+:root[data-theme="dark"] .title {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+:root[data-theme="dark"] .score-box,
+:root[data-theme="light"] .score-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: none;
+}
+:root[data-theme="dark"] .score-label,
+:root[data-theme="light"] .score-label { color: var(--muted); }
+:root[data-theme="dark"] .score-value,
+:root[data-theme="light"] .score-value { color: var(--text-dark); font-variant-numeric: tabular-nums; }
+:root[data-theme="dark"] .desc,
+:root[data-theme="light"] .desc { color: var(--muted); }
+:root[data-theme="dark"] .desc strong,
+:root[data-theme="light"] .desc strong { color: var(--text-dark); }
+:root[data-theme="dark"] .primary-btn,
+:root[data-theme="light"] .primary-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 12px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(124, 140, 255, .3);
+}
+:root[data-theme="dark"] .primary-btn:hover,
+:root[data-theme="light"] .primary-btn:hover { transform: none; filter: brightness(1.08); box-shadow: 0 4px 14px rgba(124, 140, 255, .3); }
+:root[data-theme="dark"] .lgt-btn,
+:root[data-theme="light"] .lgt-btn {
+    background: var(--panel); color: var(--text-dark); border: 1px solid var(--border); border-radius: 12px; box-shadow: none;
+}
+:root[data-theme="dark"] .lgt-btn:hover,
+:root[data-theme="light"] .lgt-btn:hover { border-color: var(--accent); background: var(--panel); }
+:root[data-theme="dark"] .game-container,
+:root[data-theme="light"] .game-container {
+    border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,.45);
+}
+:root[data-theme="light"] .game-container { box-shadow: 0 10px 40px rgba(30, 40, 80, .12); }
+:root[data-theme="dark"] .grid-cell,
+:root[data-theme="light"] .grid-cell { border-radius: 10px; }
+:root[data-theme="dark"] .game-message { background: rgba(14, 16, 22, .78); }
+:root[data-theme="light"] .game-message { background: rgba(238, 240, 246, .8); }
+:root[data-theme="dark"] .game-message h2,
+:root[data-theme="light"] .game-message h2 { color: var(--text-dark); text-shadow: none; font-size: 3rem; }
+:root[data-theme="dark"] .game-message .msg-sub,
+:root[data-theme="light"] .game-message .msg-sub { color: var(--muted); }
+:root[data-theme="dark"] .game-message .msg-sub.is-best { color: #ffb454; }
+:root[data-theme="light"] .game-message .msg-sub.is-best { color: #c77700; }
+
+/* tiles: one rule set, colours from the ramp tokens */
+:root:not([data-theme="original"]) .tile { color: var(--tile-f); }
+:root:not([data-theme="original"]) .tile-inner { border-radius: 10px; font-variant-numeric: tabular-nums; }
+:root:not([data-theme="original"]) .tile-2 .tile-inner { background: var(--t2); color: var(--t2-f, var(--tile-f)); box-shadow: var(--t2-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-4 .tile-inner { background: var(--t4); color: var(--t4-f, var(--tile-f)); box-shadow: var(--t4-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-8 .tile-inner { background: var(--t8); color: var(--t8-f, var(--tile-f)); box-shadow: var(--t8-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-16 .tile-inner { background: var(--t16); color: var(--t16-f, var(--tile-f)); box-shadow: var(--t16-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-32 .tile-inner { background: var(--t32); color: var(--t32-f, var(--tile-f)); box-shadow: var(--t32-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-64 .tile-inner { background: var(--t64); color: var(--t64-f, var(--tile-f)); box-shadow: var(--t64-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-128 .tile-inner { background: var(--t128); color: var(--t128-f, var(--tile-f)); box-shadow: var(--t128-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-256 .tile-inner { background: var(--t256); color: var(--t256-f, var(--tile-f)); box-shadow: var(--t256-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-512 .tile-inner { background: var(--t512); color: var(--t512-f, var(--tile-f)); box-shadow: var(--t512-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-1024 .tile-inner { background: var(--t1024); color: var(--t1024-f, var(--tile-f)); box-shadow: var(--t1024-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-2048 .tile-inner { background: var(--t2048); color: var(--t2048-f, var(--tile-f)); box-shadow: var(--t2048-s, var(--tile-s)); }
+:root:not([data-theme="original"]) .tile-super .tile-inner { background: var(--tsuper); color: var(--tsuper-f, var(--tile-f)); box-shadow: var(--tsuper-s, var(--tile-s)); }
+
+/* --- neubrutalism --- */
+:root[data-theme="neo"] .title,
+:root[data-theme="neo"] .score-value,
+:root[data-theme="neo"] .primary-btn,
+:root[data-theme="neo"] .game-message h2,
+:root[data-theme="neo"] .tile-inner { font-family: var(--neo-font); font-weight: 400; }
+:root[data-theme="neo"] .title { color: #111; text-shadow: 4px 4px 0 #fff; letter-spacing: -1px; }
+:root[data-theme="neo"] .score-box {
+    background: #fff; color: #111; border: 3px solid #111; border-radius: 10px; box-shadow: 4px 4px 0 #111; padding: 6px 16px;
+}
+:root[data-theme="neo"] .score-box + .score-box { background: var(--neo-yellow); }
+:root[data-theme="neo"] .score-label { color: #111; font-weight: 800; }
+:root[data-theme="neo"] .desc { color: #111; font-weight: 600; }
+:root[data-theme="neo"] .primary-btn {
+    background: var(--neo-yellow); color: #111; border: 3px solid #111; border-radius: 8px; box-shadow: 4px 4px 0 #111;
+    transition: transform .08s, box-shadow .08s;
+}
+:root[data-theme="neo"] .primary-btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #111; }
+:root[data-theme="neo"] .primary-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #111; }
+:root[data-theme="neo"] .lgt-btn { width: 44px; height: 44px; }
+:root[data-theme="neo"] .game-container { border: 3px solid #111; border-radius: 14px; box-shadow: 8px 8px 0 #111; }
+:root[data-theme="neo"] .grid-cell { border: 2px dashed rgba(17, 17, 17, .22); border-radius: 8px; }
+:root[data-theme="neo"] .tile-inner { border: 3px solid #111; border-radius: 8px; }
+:root[data-theme="neo"] { --t2048-s: 6px 6px 0 #111; --tsuper-s: 6px 6px 0 #111; }
+:root[data-theme="neo"] .tile-2 .tile-inner, :root[data-theme="neo"] .tile-4 .tile-inner, :root[data-theme="neo"] .tile-8 .tile-inner { font-size: 2.6rem; }
+:root[data-theme="neo"] .tile-16 .tile-inner, :root[data-theme="neo"] .tile-32 .tile-inner, :root[data-theme="neo"] .tile-64 .tile-inner { font-size: 2.2rem; }
+:root[data-theme="neo"] .tile-128 .tile-inner, :root[data-theme="neo"] .tile-256 .tile-inner, :root[data-theme="neo"] .tile-512 .tile-inner { font-size: 1.7rem; }
+:root[data-theme="neo"] .tile-1024 .tile-inner, :root[data-theme="neo"] .tile-2048 .tile-inner { font-size: 1.45rem; }
+:root[data-theme="neo"] .tile-super .tile-inner { font-size: 1.3rem; }
+:root[data-theme="neo"] .game-message { background: rgba(201, 184, 255, .9); backdrop-filter: none; -webkit-backdrop-filter: none; border-radius: 11px; }
+:root[data-theme="neo"] .game-message h2 { color: #111; text-shadow: 4px 4px 0 #fff; font-size: 3rem; }
+:root[data-theme="neo"] .game-message .msg-sub { color: #111; background: #fff; border: 3px solid #111; border-radius: 8px; padding: 2px 12px; box-shadow: 3px 3px 0 #111; }
+:root[data-theme="neo"] .game-message .msg-sub.is-best { background: var(--neo-green); }
+
+@media (max-width: 450px) {
+    :root[data-theme="dark"] .tile-inner, :root[data-theme="light"] .tile-inner { font-size: 2.3rem !important; }
+    :root[data-theme="dark"] .tile-16 .tile-inner, :root[data-theme="dark"] .tile-32 .tile-inner, :root[data-theme="dark"] .tile-64 .tile-inner,
+    :root[data-theme="light"] .tile-16 .tile-inner, :root[data-theme="light"] .tile-32 .tile-inner, :root[data-theme="light"] .tile-64 .tile-inner { font-size: 2rem !important; }
+    :root[data-theme="dark"] .tile-128 .tile-inner, :root[data-theme="dark"] .tile-256 .tile-inner, :root[data-theme="dark"] .tile-512 .tile-inner,
+    :root[data-theme="light"] .tile-128 .tile-inner, :root[data-theme="light"] .tile-256 .tile-inner, :root[data-theme="light"] .tile-512 .tile-inner { font-size: 1.55rem !important; }
+    :root[data-theme="dark"] .tile-1024 .tile-inner, :root[data-theme="dark"] .tile-2048 .tile-inner,
+    :root[data-theme="light"] .tile-1024 .tile-inner, :root[data-theme="light"] .tile-2048 .tile-inner { font-size: 1.2rem !important; }
+    :root[data-theme="dark"] .tile-super .tile-inner, :root[data-theme="light"] .tile-super .tile-inner { font-size: 1.1rem !important; }
+    :root:not([data-theme="original"]) .score-box { padding: 6px 10px; min-width: 64px; }
+    :root[data-theme="neo"] .score-box { padding: 3px 8px; }
+    :root[data-theme="neo"] .title { font-size: 2.3rem; text-shadow: 3px 3px 0 #fff; }
+    :root[data-theme="neo"] .tile-2 .tile-inner, :root[data-theme="neo"] .tile-4 .tile-inner, :root[data-theme="neo"] .tile-8 .tile-inner { font-size: 2rem; }
+    :root[data-theme="neo"] .tile-16 .tile-inner, :root[data-theme="neo"] .tile-32 .tile-inner, :root[data-theme="neo"] .tile-64 .tile-inner { font-size: 1.65rem; }
+    :root[data-theme="neo"] .tile-128 .tile-inner, :root[data-theme="neo"] .tile-256 .tile-inner, :root[data-theme="neo"] .tile-512 .tile-inner { font-size: 1.25rem; }
+    :root[data-theme="neo"] .tile-1024 .tile-inner, :root[data-theme="neo"] .tile-2048 .tile-inner { font-size: 1.05rem; }
+    :root[data-theme="neo"] .tile-super .tile-inner { font-size: .95rem; }
+    :root[data-theme="neo"] .lgt-btn { width: 40px; height: 40px; }
+    :root[data-theme="dark"] .game-message h2, :root[data-theme="light"] .game-message h2, :root[data-theme="neo"] .game-message h2 { font-size: 2.4rem; }
 }

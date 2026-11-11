@@ -4,7 +4,14 @@ let tiles = [];
 let tileIdCounter = 0;
 
 let score = 0;
-let bestScore = localStorage.getItem('2048-best-score') || 0;
+// Theme picker + local records (shared kit). The old '2048-best-score' key only seeds the records once.
+LGT.init({
+    game: '2048',
+    title: '2048',
+    themes: ['original', 'dark', 'light', 'neo'],
+    swatch: 'linear-gradient(135deg,#faf8ef 50%,#edc22e 50%)',
+    records: { kind: 'score', legacyBest: Number(localStorage.getItem('2048-best-score')) || 0 }
+});
 let isGameOver = false;
 let isGameWon = false;
 let hasWonBefore = false;
@@ -16,6 +23,7 @@ const scoreEl = document.getElementById('score');
 const bestScoreEl = document.getElementById('best-score');
 const msgEl = document.getElementById('game-message');
 const msgText = document.getElementById('msg-text');
+const msgSub = document.getElementById('msg-sub');
 
 // Initialize grid-bg
 const gridBg = document.getElementById('grid-bg');
@@ -26,6 +34,10 @@ for (let i = 0; i < SIZE * SIZE; i++) {
 }
 
 function initGame() {
+    // A game that already reached 2048 is worth keeping even if the player starts over before game over.
+    if ((isGameWon || hasWonBefore) && !isGameOver && score > 0) {
+        LGT.addRecord({ value: score, detail: `最大方塊 ${maxTile()} · 中途重開` });
+    }
     grid = Array.from({length: SIZE}, () => Array(SIZE).fill(null));
     tiles = [];
     tileContainer.innerHTML = '';
@@ -38,8 +50,8 @@ function initGame() {
     msgEl.classList.add('hidden');
     document.getElementById('keep-playing-btn').classList.add('hidden');
     
+    msgSub.classList.add('hidden');
     updateScore();
-    bestScoreEl.textContent = bestScore;
     
     addRandomTile();
     addRandomTile();
@@ -96,11 +108,20 @@ function render() {
 
 function updateScore() {
     scoreEl.textContent = score;
-    if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem('2048-best-score', bestScore);
-        bestScoreEl.textContent = bestScore;
-    }
+    // live display: the stored best only changes when a finished game is recorded
+    bestScoreEl.textContent = Math.max(score, LGT.best() || 0);
+}
+
+function maxTile() {
+    return tiles.reduce((m, t) => Math.max(m, t.val), 0);
+}
+
+function recordGame() {
+    const res = LGT.addRecord({ value: score, detail: `最大方塊 ${maxTile()}` });
+    updateScore();
+    msgSub.textContent = res.isBest && score > 0 ? '新紀錄！' : `最佳 ${LGT.format(LGT.best())}`;
+    msgSub.classList.toggle('is-best', res.isBest && score > 0);
+    msgSub.classList.remove('hidden');
 }
 
 function move(direction) {
@@ -165,6 +186,7 @@ function move(direction) {
         
         if (!movesAvailable()) {
             isGameOver = true;
+            recordGame();
             showMsg("Game Over!", false);
         } else if (isGameWon && !keepPlaying) {
             showMsg("You Win!", true);
@@ -224,6 +246,7 @@ function movesAvailable() {
 function showMsg(msg, isWon) {
     msgText.textContent = msg;
     msgEl.classList.remove('hidden');
+    if (isWon) msgSub.classList.add('hidden');
     if (isWon) {
         document.getElementById('keep-playing-btn').classList.remove('hidden');
         document.getElementById('retry-btn').textContent = 'Restart';
@@ -234,6 +257,8 @@ function showMsg(msg, isWon) {
 }
 
 document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || LGT.isOpen()) return;
+    if (e.code === 'KeyT') { LGT.cycleTheme(); return; }
     const map = {
         'ArrowUp': 0, 'KeyW': 0,
         'ArrowRight': 1, 'KeyD': 1,
@@ -258,6 +283,7 @@ document.addEventListener('touchmove', (e) => {
 
 document.addEventListener('touchend', (e) => {
     if (!touchStart || e.changedTouches.length === 0) return;
+    if (LGT.isOpen()) { touchStart = null; return; }
     
     const dx = e.changedTouches[0].clientX - touchStart.x;
     const dy = e.changedTouches[0].clientY - touchStart.y;

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="version" content="1.1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zen Hitori</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -21,12 +22,17 @@
         </header>
         
         <div class="controls">
+            <div class="hud">
+                <span class="hud-time" title="用時"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><b id="hud-time">0:00</b></span>
+                <span class="hud-best">最快 <b id="hud-best">—</b></span>
+            </div>
             <select id="size-select" class="glass-btn">
                 <option value="5">5 x 5</option>
                 <option value="6">6 x 6</option>
                 <option value="8" selected>8 x 8</option>
             </select>
             <button id="new-game-btn" class="glass-btn primary">New Game</button>
+            <span class="hud-kit" data-lgt-kit></span>
         </div>
         
         <div class="board-wrapper">
@@ -61,6 +67,19 @@
     </div>
 
     <!-- Scripts -->
+    <script src="/shared/lgt-kit.js"></script>
+    <script>
+        LGT.init({
+            game: 'hitori',
+            title: 'Hitori',
+            themes: ['original', 'dark', 'light', 'neo'],
+            swatch: 'linear-gradient(135deg,#e0f2f1 50%,#4db6ac 50%)',
+            records: {
+                kind: 'time',
+                variants: [{ id: '5', label: '5 × 5' }, { id: '6', label: '6 × 6' }, { id: '8', label: '8 × 8' }]
+            }
+        });
+    </script>
     <script src="js/generator.js"></script>
     <script src="js/game.js"></script>
     <script src="/shared/layout.js"></script>

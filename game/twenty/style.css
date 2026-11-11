@@ -28,9 +28,16 @@
     --c18: #831843;
     --c19: #ff0055;
     --c20: #ffffff; /* white flash */
+    --f20: #000;
+
+    --font: 'Outfit', sans-serif;
+    --tile-ink: #fff;
+    /* kit (theme menu / records panel) in the original slate palette */
+    --kit-surface: #1e293b; --kit-surface2: #273449; --kit-text: #f8fafc; --kit-muted: #94a3b8;
+    --kit-border: #334155; --kit-accent: #ef4444;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Outfit', sans-serif; touch-action: none; }
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: var(--font); touch-action: none; }
 
 body {
     background-color: var(--bg-page);
@@ -103,6 +110,28 @@ body {
 
 .tile:active { cursor: grabbing; }
 
+/* block colours: one custom property per value (--c1 … --c20), overridden per theme */
+.tile.v1 { background-color: var(--c1); color: var(--f1, var(--tile-ink)); }
+.tile.v2 { background-color: var(--c2); color: var(--f2, var(--tile-ink)); }
+.tile.v3 { background-color: var(--c3); color: var(--f3, var(--tile-ink)); }
+.tile.v4 { background-color: var(--c4); color: var(--f4, var(--tile-ink)); }
+.tile.v5 { background-color: var(--c5); color: var(--f5, var(--tile-ink)); }
+.tile.v6 { background-color: var(--c6); color: var(--f6, var(--tile-ink)); }
+.tile.v7 { background-color: var(--c7); color: var(--f7, var(--tile-ink)); }
+.tile.v8 { background-color: var(--c8); color: var(--f8, var(--tile-ink)); }
+.tile.v9 { background-color: var(--c9); color: var(--f9, var(--tile-ink)); }
+.tile.v10 { background-color: var(--c10); color: var(--f10, var(--tile-ink)); }
+.tile.v11 { background-color: var(--c11); color: var(--f11, var(--tile-ink)); }
+.tile.v12 { background-color: var(--c12); color: var(--f12, var(--tile-ink)); }
+.tile.v13 { background-color: var(--c13); color: var(--f13, var(--tile-ink)); }
+.tile.v14 { background-color: var(--c14); color: var(--f14, var(--tile-ink)); }
+.tile.v15 { background-color: var(--c15); color: var(--f15, var(--tile-ink)); }
+.tile.v16 { background-color: var(--c16); color: var(--f16, var(--tile-ink)); }
+.tile.v17 { background-color: var(--c17); color: var(--f17, var(--tile-ink)); }
+.tile.v18 { background-color: var(--c18); color: var(--f18, var(--tile-ink)); }
+.tile.v19 { background-color: var(--c19); color: var(--f19, var(--tile-ink)); }
+.tile.v20 { background: var(--c20); color: var(--f20, var(--tile-ink)); }
+
 .tile.dragging {
     transition: none; /* No transition while following cursor */
     z-index: 100;
@@ -119,6 +148,23 @@ body {
 
 .overlay h2 { font-size: 3rem; color: #ef4444; font-weight: 900; }
 .overlay.hidden { display: none; }
+.over-sub { margin-top: -8px; font-size: 1.1rem; font-weight: 700; color: #cbd5e1; }
+.over-sub.is-best { color: #facc15; }
+
+/* best + kit buttons row under the title */
+.subbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: -5px; }
+.best-pill {
+    display: flex; align-items: baseline; gap: 8px;
+    background: var(--bg-board); padding: 6px 14px; border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+.best-pill span { font-size: 0.8rem; opacity: 0.7; font-weight: 700; }
+.best-pill b { font-size: 1.2rem; font-weight: 900; }
+.kit .lgt-btn {
+    width: 38px; height: 38px; border: none; border-radius: 8px;
+    background: var(--bg-board); color: var(--text-primary); box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+.kit .lgt-btn:hover { background: #334155; }
 
 .btn {
     padding: 12px 24px; font-size: 1.2rem; font-weight: 700;
@@ -131,4 +177,175 @@ body {
     :root {
         --tile-size: 50px;
     }
+    /* phones: keep the added best/kit row from pushing the board under the fixed footer */
+    .game-wrapper { gap: 10px; }
+    .subbar { margin-top: -2px; }
+    .best-pill { padding: 4px 12px; }
+    .kit .lgt-btn { width: 34px; height: 34px; }
+}
+
+/* =====================================================================
+   Themes (set by /shared/lgt-kit.js on <html data-theme>):
+   original = everything above, unchanged. dark / light = site family look.
+   neo = neubrutalism. Each theme redefines the 20-step block ramp
+   --c1…--c20 (background) and --f1…--f20 (number colour where the
+   default --tile-ink would not be readable).
+   ===================================================================== */
+:root[data-theme="dark"],
+:root[data-theme="light"] {
+    --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+}
+:root[data-theme="dark"] {
+    --bg-page: #0e1016; --bg-board: #161922; --panel2: #1c202b; --border: #262b38;
+    --text-primary: #e6e8ee; --muted: #8b93a7; --accent: #7c8cff; --accent2: #a78bfa;
+    --kit-surface: #161922; --kit-surface2: #1c202b; --kit-text: #e6e8ee; --kit-muted: #8b93a7; --kit-border: #262b38; --kit-accent: #7c8cff;
+    --tile-ink: #fff; --ink-dark: #12141c;
+    --c1: #4b5576;  --c2: #3f63d8;  --c3: #2a8fd6;  --c4: #1f9e9a;  --c5: #2f9e57;
+    --c6: #8bb52f;  --f6: var(--ink-dark);
+    --c7: #dcae2c;  --f7: var(--ink-dark);
+    --c8: #ec8434;  --f8: var(--ink-dark);
+    --c9: #e0503f;  --c10: #d63c79; --c11: #b544c4; --c12: #7d4fe0;
+    --c13: #a5b4fc; --f13: var(--ink-dark);
+    --c14: #7dd3fc; --f14: var(--ink-dark);
+    --c15: #86efac; --f15: var(--ink-dark);
+    --c16: #fde68a; --f16: var(--ink-dark);
+    --c17: #fdba74; --f17: var(--ink-dark);
+    --c18: #fca5a5; --f18: var(--ink-dark);
+    --c19: #f0abfc; --f19: var(--ink-dark);
+    --c20: linear-gradient(135deg, #7c8cff, #a78bfa); --f20: #fff;
+}
+:root[data-theme="light"] {
+    --bg-page: #eef0f6; --bg-board: #ffffff; --panel2: #f5f6fa; --border: #e1e4ec;
+    --text-primary: #1b2133; --muted: #6b7389; --accent: #4f5bff; --accent2: #8b5cf6;
+    --kit-surface: #ffffff; --kit-surface2: #f2f3f8; --kit-text: #1b2133; --kit-muted: #5f6680; --kit-border: #e1e4ec; --kit-accent: #4f5bff;
+    --tile-ink: #fff; --ink-dark: #1b2133;
+    --c1: #d5dbea;  --f1: var(--ink-dark);
+    --c2: #3f63d8;  --c3: #1f86c9;  --c4: #12857f;  --c5: #23884a;
+    --c6: #9cc93a;  --f6: var(--ink-dark);
+    --c7: #f0bd2e;  --f7: var(--ink-dark);
+    --c8: #f59245;  --f8: var(--ink-dark);
+    --c9: #e04a3a;  --c10: #d63c79; --c11: #b03fc0; --c12: #7547df;
+    --c13: #312e81; --c14: #075985; --c15: #166534; --c16: #854d0e;
+    --c17: #9a3412; --c18: #991b1b; --c19: #86198f;
+    --c20: linear-gradient(135deg, #4f5bff, #a78bfa); --f20: #fff;
+}
+:root[data-theme="neo"] {
+    --font: "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+    --bg-page: var(--neo-bg); --bg-board: #fff; --text-primary: #111;
+    --tile-ink: #111;
+    --c1: #ffffff;           --c2: var(--neo-yellow);  --c3: var(--neo-orange); --c4: var(--neo-red);
+    --c5: var(--neo-pink);   --c6: var(--neo-purple);  --f6: #fff;
+    --c7: var(--neo-blue);   --f7: #fff;
+    --c8: var(--neo-cyan);   --c9: var(--neo-green);
+    --c10: #0f8a4f;          --f10: #fff;
+    /* 11–18: ink blocks with coloured numbers (and matching hard shadow) */
+    --c11: #111; --f11: var(--neo-yellow);
+    --c12: #111; --f12: var(--neo-orange);
+    --c13: #111; --f13: var(--neo-red);
+    --c14: #111; --f14: var(--neo-pink);
+    --c15: #111; --f15: #c9b8ff;
+    --c16: #111; --f16: var(--neo-cyan);
+    --c17: #111; --f17: var(--neo-green);
+    --c18: #111; --f18: #fff;
+    --c19: #c9b8ff;
+    --c20: repeating-linear-gradient(135deg, var(--neo-yellow) 0 8px, var(--neo-pink) 8px 16px); --f20: #111;
+}
+
+/* --- dark & light --- */
+:root[data-theme="dark"] .title,
+:root[data-theme="light"] .title { font-weight: 800; letter-spacing: 1px; }
+:root[data-theme="dark"] .title {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+:root[data-theme="dark"] .score-card, :root[data-theme="light"] .score-card,
+:root[data-theme="dark"] .best-pill, :root[data-theme="light"] .best-pill {
+    border: 1px solid var(--border); border-radius: 12px; box-shadow: none;
+}
+:root[data-theme="dark"] .score-card span:first-child, :root[data-theme="light"] .score-card span:first-child,
+:root[data-theme="dark"] .best-pill span, :root[data-theme="light"] .best-pill span { opacity: 1; color: var(--muted); }
+:root[data-theme="dark"] .score-card span:last-child, :root[data-theme="light"] .score-card span:last-child,
+:root[data-theme="dark"] .best-pill b, :root[data-theme="light"] .best-pill b { font-weight: 800; font-variant-numeric: tabular-nums; }
+:root[data-theme="dark"] .kit .lgt-btn, :root[data-theme="light"] .kit .lgt-btn {
+    background: var(--bg-board); border: 1px solid var(--border); border-radius: 12px; box-shadow: none; color: var(--text-primary);
+}
+:root[data-theme="dark"] .kit .lgt-btn:hover, :root[data-theme="light"] .kit .lgt-btn:hover { border-color: var(--accent); background: var(--bg-board); }
+:root[data-theme="dark"] .danger-bar-wrapper, :root[data-theme="light"] .danger-bar-wrapper { background: var(--panel2); border: 1px solid var(--border); }
+:root[data-theme="dark"] .danger-bar, :root[data-theme="light"] .danger-bar { background: linear-gradient(90deg, #ffb454, #ff6b7a); }
+:root[data-theme="dark"] .board-frame, :root[data-theme="light"] .board-frame {
+    border-radius: 16px; outline: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,.45);
+    background-color: var(--bg-board);
+    /* faint column guides */
+    background-image: repeating-linear-gradient(90deg, transparent 0 calc(var(--tile-size) + var(--gap)), var(--panel2) 0 calc(var(--tile-size) + var(--gap) + 1px));
+    background-position: calc(var(--gap) / 2) 0;
+}
+:root[data-theme="light"] .board-frame { box-shadow: 0 10px 40px rgba(30, 40, 80, .12); }
+:root[data-theme="dark"] .tile, :root[data-theme="light"] .tile {
+    border-radius: 12px; font-weight: 800; text-shadow: none;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.22);
+}
+:root[data-theme="dark"] .tile.v20 { box-shadow: 0 0 18px 2px rgba(124, 140, 255, .55); }
+:root[data-theme="light"] .tile.v20 { box-shadow: 0 0 18px 2px rgba(79, 91, 255, .4); }
+:root[data-theme="dark"] .tile.dragging, :root[data-theme="light"] .tile.dragging { box-shadow: 0 10px 24px rgba(0,0,0,.35); }
+:root[data-theme="dark"] .overlay { background: rgba(14, 16, 22, .82); }
+:root[data-theme="light"] .overlay { background: rgba(238, 240, 246, .85); }
+:root[data-theme="dark"] .overlay h2 { color: #ff6b7a; font-weight: 800; }
+:root[data-theme="light"] .overlay h2 { color: #e5354a; font-weight: 800; }
+:root[data-theme="dark"] .over-sub, :root[data-theme="light"] .over-sub { color: var(--muted); }
+:root[data-theme="dark"] .over-sub.is-best { color: #ffb454; }
+:root[data-theme="light"] .over-sub.is-best { color: #c77700; }
+:root[data-theme="dark"] .btn, :root[data-theme="light"] .btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 12px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(124, 140, 255, .3);
+}
+:root[data-theme="dark"] .btn:hover, :root[data-theme="light"] .btn:hover { filter: brightness(1.08); }
+
+/* --- neubrutalism --- */
+:root[data-theme="neo"] .title,
+:root[data-theme="neo"] .score-card span:last-child,
+:root[data-theme="neo"] .best-pill b,
+:root[data-theme="neo"] .overlay h2,
+:root[data-theme="neo"] .btn,
+:root[data-theme="neo"] .tile { font-family: var(--neo-font); font-weight: 400; }
+:root[data-theme="neo"] .title { color: #111; letter-spacing: 0; font-size: 2.6rem; text-shadow: 3px 3px 0 #fff; }
+:root[data-theme="neo"] .score-card, :root[data-theme="neo"] .best-pill {
+    border: 3px solid #111; border-radius: 10px; box-shadow: 4px 4px 0 #111; color: #111;
+}
+:root[data-theme="neo"] .score-card { background: var(--neo-yellow); }
+:root[data-theme="neo"] .best-pill { padding: 3px 12px; }
+:root[data-theme="neo"] .score-card span:first-child, :root[data-theme="neo"] .best-pill span { opacity: 1; font-weight: 800; }
+:root[data-theme="neo"] .kit .lgt-btn { width: 38px; height: 38px; }
+:root[data-theme="neo"] .danger-bar-wrapper { height: 16px; border: 3px solid #111; border-radius: 6px; background: #fff; }
+:root[data-theme="neo"] .danger-bar { background: var(--neo-red); border-right: 3px solid #111; }
+:root[data-theme="neo"] .board-frame {
+    border: 3px solid #111; border-radius: 12px; box-shadow: 6px 6px 0 #111;
+    /* keep the inner area exactly board-width × board-height so JS positions still line up */
+    box-sizing: content-box; margin: 0 -3px; background: var(--neo-panel2);
+}
+:root[data-theme="neo"] .tile {
+    border: 3px solid #111; border-radius: 8px; text-shadow: none; box-shadow: 3px 3px 0 var(--s, #111); font-size: 1.6rem;
+}
+:root[data-theme="neo"] .tile.v11 { --s: var(--f11); } :root[data-theme="neo"] .tile.v12 { --s: var(--f12); }
+:root[data-theme="neo"] .tile.v13 { --s: var(--f13); } :root[data-theme="neo"] .tile.v14 { --s: var(--f14); }
+:root[data-theme="neo"] .tile.v15 { --s: var(--f15); } :root[data-theme="neo"] .tile.v16 { --s: var(--f16); }
+:root[data-theme="neo"] .tile.v17 { --s: var(--f17); } :root[data-theme="neo"] .tile.v18 { --s: #ff5c5c; }
+:root[data-theme="neo"] .tile.v20 { text-shadow: 2px 2px 0 #fff; }
+:root[data-theme="neo"] .tile.dragging { box-shadow: 6px 6px 0 #111; }
+:root[data-theme="neo"] .overlay { background: rgba(201, 184, 255, .9); backdrop-filter: none; -webkit-backdrop-filter: none; }
+:root[data-theme="neo"] .overlay h2 { color: #111; text-shadow: 4px 4px 0 var(--neo-red); font-size: 2.6rem; }
+:root[data-theme="neo"] .over-sub { color: #111; background: #fff; border: 3px solid #111; border-radius: 8px; padding: 2px 12px; box-shadow: 3px 3px 0 #111; font-size: 1rem; }
+:root[data-theme="neo"] .over-sub.is-best { background: var(--neo-green); }
+:root[data-theme="neo"] .btn {
+    background: var(--neo-yellow); color: #111; border: 3px solid #111; border-radius: 8px; box-shadow: 4px 4px 0 #111;
+    transition: transform .08s, box-shadow .08s;
+}
+:root[data-theme="neo"] .btn:hover { background: var(--neo-yellow); transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #111; }
+:root[data-theme="neo"] .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #111; }
+
+@media (max-width: 400px) {
+    :root[data-theme="neo"] .tile { font-size: 1.3rem; }
+    :root[data-theme="neo"] .title { font-size: 2.2rem; }
+    :root[data-theme="neo"] .kit .lgt-btn { width: 34px; height: 34px; }
+    :root[data-theme="neo"] .danger-bar-wrapper { height: 13px; }
+    :root[data-theme="dark"] .tile, :root[data-theme="light"] .tile { font-size: 1.6rem; }
 }

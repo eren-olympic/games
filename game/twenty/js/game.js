@@ -1,3 +1,12 @@
+// Theme picker + local records (shared kit). Score = highest block reached.
+LGT.init({
+    game: 'twenty',
+    title: '二十',
+    themes: ['original', 'dark', 'light', 'neo'],
+    swatch: 'linear-gradient(135deg,#1e293b 50%,#ef4444 50%)',
+    records: { kind: 'score' }
+});
+
 const COLS = 5;
 const ROWS = 8;
 const GAP = 5;
@@ -9,10 +18,15 @@ const dangerBar = document.getElementById('danger-bar');
 const maxTileEl = document.getElementById('max-tile');
 const overlay = document.getElementById('game-over');
 const restartBtn = document.getElementById('restart-btn');
+const bestTileEl = document.getElementById('best-tile');
+const overSubEl = document.getElementById('over-sub');
 
 let grid = [];
 let maxTile = 1;
 let isGameOver = false;
+let paused = false;   // records panel open
+let playMs = 0;       // survived time, excluding pauses
+let merges = 0;
 
 // Danger Timer
 let dangerTimer = 0;
@@ -28,15 +42,13 @@ let dragStartX = 0;
 let dragStartY = 0;
 let boardRect = null;
 
-const colors = [
-    '#333', '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', 
-    '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#db2777', '#be123c',
-    '#9f1239', '#e11d48', '#be185d', '#9d174d', '#831843', '#ff0055', '#ffffff'
-];
+// Block colours live in style.css (.tile.v1 … .tile.v20, per theme).
 
 function initGame() {
     isGameOver = false;
     dangerTimer = 0;
+    playMs = 0;
+    merges = 0;
     maxTile = 1;
     updateMaxTile();
     overlay.classList.add('hidden');
@@ -56,10 +68,8 @@ function initGame() {
 
 function createTileElement(val) {
     const el = document.createElement('div');
-    el.className = 'tile';
+    el.className = `tile v${Math.min(val, 20)}`;
     el.textContent = val;
-    el.style.backgroundColor = colors[Math.min(val, 20)];
-    if(val >= 20) el.style.color = '#000';
     
     el.addEventListener('pointerdown', handlePointerDown);
     board.appendChild(el);
@@ -188,6 +198,7 @@ function resolveGravityCombo(c, injectedObj) {
     if (topObj.val === nextObj.val) {
         // Merge!
         let newVal = topObj.val + 1;
+        merges++;
         
         // Remove both old DOM elements safely
         topObj.el.remove();
@@ -219,12 +230,24 @@ function checkGameOver() {
 }
 
 function triggerGameOver() {
+    if (isGameOver) return;
     isGameOver = true;
+    const s = Math.round(playMs / 1000);
+    const res = LGT.addRecord({
+        value: maxTile,
+        detail: `撐了 ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · 合併 ${merges} 次`
+    });
+    updateMaxTile();
+    const isNew = res.isBest && maxTile > 0;
+    overSubEl.textContent = isNew ? `最高 ${maxTile} · 新紀錄！` : `最高 ${maxTile} · 最佳 ${LGT.format(LGT.best())}`;
+    overSubEl.classList.toggle('is-best', isNew);
     overlay.classList.remove('hidden');
 }
 
 function updateMaxTile() {
     maxTileEl.textContent = maxTile;
+    const b = LGT.best();
+    bestTileEl.textContent = b == null ? '–' : b;
 }
 
 function gameLoop(time) {
@@ -233,7 +256,10 @@ function gameLoop(time) {
     let delta = time - lastTime;
     lastTime = time;
     
-    dangerTimer += delta;
+    if (!paused) {
+        dangerTimer += delta;
+        playMs += delta;
+    }
     
     if (dangerTimer >= DANGER_MAX) {
         dangerTimer = 0;
@@ -255,6 +281,15 @@ document.addEventListener('pointerup', (e) => {
 });
 
 restartBtn.addEventListener('click', initGame);
+
+// The row timer stops while the records panel is open.
+window.addEventListener('lgt:records-open', () => { paused = true; });
+window.addEventListener('lgt:records-close', () => { paused = false; });
+
+document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || LGT.isOpen()) return;
+    if (e.key === 't' || e.key === 'T') LGT.cycleTheme();
+});
 
 // Resize handler to update boardRect
 window.addEventListener('resize', () => {

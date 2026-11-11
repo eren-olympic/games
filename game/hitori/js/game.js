@@ -4,6 +4,49 @@ let cellStates = []; // 0 = Empty, 1 = Black, 2 = Circled
 
 const boardEl = document.getElementById('game-board');
 const statusEl = document.getElementById('status-message');
+const hudTimeEl = document.getElementById('hud-time');
+const hudBestEl = document.getElementById('hud-best');
+
+// ---- elapsed timer: starts on the first move, stops on solve, pauses while the tab is hidden ----
+let solved = false;
+let elapsedMs = 0;      // banked time
+let runStart = null;    // performance.now() of the running segment, null when stopped
+let started = false;
+let tickId = null;
+
+function elapsedSec() {
+    return (elapsedMs + (runStart == null ? 0 : performance.now() - runStart)) / 1000;
+}
+function fmtTime(sec) {
+    const s = Math.floor(sec), m = Math.floor(s / 60);
+    return m + ':' + String(s % 60).padStart(2, '0');
+}
+function renderTime() { hudTimeEl.textContent = fmtTime(elapsedSec()); }
+function timerRun() {
+    if (runStart != null || !started || solved || document.hidden) return;
+    runStart = performance.now();
+    tickId = setInterval(renderTime, 250);
+}
+function timerPause() {
+    if (runStart == null) return;
+    elapsedMs += performance.now() - runStart;
+    runStart = null;
+    clearInterval(tickId);
+    renderTime();
+}
+function timerReset() {
+    timerPause();
+    elapsedMs = 0; started = false;
+    renderTime();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) timerPause(); else timerRun(); });
+
+function variantId() { return String(currentSize); }
+function updateBest() {
+    const b = window.LGT ? LGT.best(variantId()) : null;
+    hudBestEl.textContent = b == null ? '—' : LGT.format(b);
+    hudBestEl.classList.remove('hud-rec');
+}
 
 function initGame() {
     currentSize = parseInt(document.getElementById('size-select').value);
@@ -11,6 +54,10 @@ function initGame() {
     
     cellStates = Array.from({ length: currentSize }, () => Array(currentSize).fill(0));
     
+    solved = false;
+    timerReset();
+    updateBest();
+    boardEl.classList.remove('solved');
     renderBoard();
     clearStatus();
 }
@@ -39,7 +86,9 @@ function renderBoard() {
 
 function handleCellClick(e, r, c) {
     e.preventDefault();
+    if (solved) return;
     clearStatus();
+    if (!started) { started = true; timerRun(); }
     
     if (e.button === 0) { // Left click
         if (cellStates[r][c] === 3) {
@@ -58,7 +107,48 @@ function handleCellClick(e, r, c) {
     }
     
     updateBoardVisuals();
+    if (isSolvedState()) onSolved();
 }
+
+// Silent rule check (same rules as checkSolution): no touching blacks, unshaded connected, no duplicates
+function isSolvedState() {
+    const n = currentSize;
+    const black = cellStates.map(row => row.map(v => v === 2));
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+        if (!black[r][c]) continue;
+        if ((r + 1 < n && black[r + 1][c]) || (c + 1 < n && black[r][c + 1])) return false;
+    }
+    for (let i = 0; i < n; i++) {
+        const row = new Set(), col = new Set();
+        for (let j = 0; j < n; j++) {
+            if (!black[i][j]) { const v = puzzleData.puzzle[i][j]; if (row.has(v)) return false; row.add(v); }
+            if (!black[j][i]) { const v = puzzleData.puzzle[j][i]; if (col.has(v)) return false; col.add(v); }
+        }
+    }
+    return HitoriGenerator.isConnected(black, n);
+}
+
+// Called exactly once per solved puzzle: stop the clock, lock the board, save the time
+function onSolved() {
+    if (solved) return;
+    if (!started) { started = true; }
+    timerPause();
+    solved = true;
+    boardEl.classList.add('solved');
+    const sec = Math.floor(elapsedSec());
+    renderTime();
+    let extra = '用時 ' + fmtTime(sec);
+    if (window.LGT) {
+        const shaded = cellStates.flat().filter(v => v === 2).length;
+        const res = LGT.addRecord({ value: sec, variant: variantId(), won: true, detail: `${currentSize}×${currentSize} · 塗黑 ${shaded} 格` });
+        extra += res.isBest ? '　新紀錄！' : '　·　最快 ' + LGT.format(res.best);
+        updateBest();
+        hudBestEl.classList.toggle('hud-rec', res.isBest);
+    }
+    solvedMsg = extra;
+    showStatus("Congratulations! You solved it! 🎉", true);
+}
+let solvedMsg = '';
 
 function updateBoardVisuals() {
     const cells = boardEl.children;
@@ -147,12 +237,19 @@ function checkSolution() {
             showStatus("There are duplicate numbers or touching black cells (highlighted in red).", false);
         }
     } else if (isValid) {
-        showStatus("Congratulations! You solved it! 🎉", true);
+        if (!solved) onSolved();
+        else showStatus("Congratulations! You solved it! 🎉", true);
     }
 }
 
 function showStatus(msg, isSuccess) {
     statusEl.textContent = msg;
+    if (isSuccess && solved && solvedMsg) {
+        const sub = document.createElement('span');
+        sub.className = 'status-sub';
+        sub.textContent = solvedMsg;
+        statusEl.appendChild(sub);
+    }
     statusEl.className = 'status ' + (isSuccess ? 'success' : 'fail');
 }
 
@@ -171,5 +268,21 @@ document.getElementById('check-btn').addEventListener('click', checkSolution);
 const modal = document.getElementById('rules-modal');
 document.getElementById('hint-btn').addEventListener('click', () => { modal.classList.remove('hidden'); });
 document.getElementById('close-rules-btn').addEventListener('click', () => { modal.classList.add('hidden'); });
+
+// records panel opens on the current size's tab; pause the clock while it is open
+document.addEventListener('click', (e) => {
+    if (e.target.closest && e.target.closest('#lgtRecBtn') && window.LGT) {
+        e.stopImmediatePropagation();
+        LGT.openRecords(variantId());
+    }
+}, true);
+window.addEventListener('lgt:records-open', timerPause);
+window.addEventListener('lgt:records-close', timerRun);
+
+document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || (window.LGT && LGT.isOpen())) return;
+    if (e.key === 't' || e.key === 'T') LGT.cycleTheme();
+    else if (e.key === 'Escape' && !modal.classList.contains('hidden')) modal.classList.add('hidden');
+});
 
 initGame();
