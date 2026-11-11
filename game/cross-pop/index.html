@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="version" content="1.0.0">
+<meta name="version" content="1.0.1">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>十字消 · Cross Pop</title>
 <style>
@@ -23,7 +23,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{background:var(--bg);color:var(--text);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
-  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;transition:background .25s}
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;transition:background .25s}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .app{max-width:1200px;margin:0 auto;padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
 header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -55,6 +55,8 @@ main{display:flex;justify-content:center}
 .cell::before{content:"";position:absolute;inset:calc(var(--cell)*.06);border-radius:24%;background:var(--slot);transition:background .1s}
 .board.live .cell.empty{cursor:pointer}
 @media (hover:hover){.board.live .cell.empty:hover::before{background:var(--slothover)}}
+.cell::before{transition:background .1s,transform .1s}
+.board.live .cell.down::before{background:var(--slothover);transform:scale(.86)}
 .t{position:relative;width:100%;height:100%;border-radius:24%;background:var(--c);
   box-shadow:inset 0 calc(var(--cell)*-.08) 0 rgba(0,0,0,.22),inset 0 calc(var(--cell)*.06) 0 rgba(255,255,255,.22);
   display:grid;place-items:center;color:rgba(0,0,0,.55);font-size:calc(var(--cell)*.5);line-height:1;
@@ -171,12 +173,20 @@ function matches(i){
 }
 function anyMove(){for(let i=0;i<grid.length;i++)if(grid[i]<0&&matches(i).length)return true;return false}
 
+// press marks the cell; the move fires on release over the same cell (slide off to cancel).
+// Touch and pen pointers are implicitly captured, so read the cell under the release point instead of e.target.
+let pressed=-1;
+function cellAt(x,y){const d=document.elementFromPoint(x,y)?.closest('.cell');return d&&board.contains(d)?+d.dataset.i:-1}
+function press(i){if(pressed>=0)cells[pressed].classList.remove('down');pressed=i;if(i>=0)cells[i].classList.add('down')}
 board.addEventListener('pointerdown',e=>{
   if(state!=='run'||e.button>0)return;
-  const d=e.target.closest('.cell');if(!d)return;
-  const i=+d.dataset.i;if(grid[i]>=0)return; // tapping a tile does nothing
-  e.preventDefault();play(i);
+  const i=cellAt(e.clientX,e.clientY);if(i<0||grid[i]>=0)return; // tapping a tile does nothing
+  e.preventDefault();press(i);
 });
+addEventListener('pointermove',e=>{if(pressed>=0&&cellAt(e.clientX,e.clientY)!==pressed)cells[pressed].classList.remove('down');
+  else if(pressed>=0)cells[pressed].classList.add('down')});
+addEventListener('pointerup',e=>{if(pressed<0)return;const p=pressed,i=cellAt(e.clientX,e.clientY);press(-1);if(i===p&&state==='run')play(i)});
+addEventListener('pointercancel',()=>press(-1));
 function play(i){
   const hit=matches(i),o=centre(i);
   if(hit.length){
@@ -210,7 +220,7 @@ function drawTime(){
 }
 function tick(){if(state!=='run')return;drawTime();if(left()<=0){end('time');return}requestAnimationFrame(tick)}
 function hud(){$('#score').textContent=score;$('#best').textContent=opts.best}
-function setCover(html){coverCard.innerHTML=html;cover.classList.toggle('show',!!html);board.classList.toggle('blur',!!html&&state!=='over');board.classList.toggle('live',state==='run')}
+function setCover(html){press(-1);coverCard.innerHTML=html;cover.classList.toggle('show',!!html);board.classList.toggle('blur',!!html&&state!=='over');board.classList.toggle('live',state==='run')}
 function idle(){
   state='idle';used=0;penalty=0;score=0;newBoard();paint();hud();drawTime();
   setCover(`<h2>十字消</h2><p>點一個<b>空格</b>，往上下左右各找最近的方塊，<br>其中同色的會一起消掉。沒消到扣 10 秒。<br>每消一個得 1 分，限時 2 分鐘。</p><button class="primary" data-act="start">開始（Enter）</button>`);

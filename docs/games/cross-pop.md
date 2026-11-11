@@ -7,7 +7,7 @@
 
 ## Core Mechanics
 1. **Board**: 23 × 15 cells holding 200 tiles, exactly 20 in each of 10 colours, scattered at random; the other 145 cells are empty.
-2. **Move**: Tap an empty cell. From it, the nearest tile up, down, left and right is found (skipping empty cells). Every colour that appears two or more times among those (up to four) tiles is cleared, so two pairs clear together.
+2. **Move**: Press an empty cell and release on the same cell (sliding off before release cancels). The move fires on release, not on press. From it, the nearest tile up, down, left and right is found (skipping empty cells). Every colour that appears two or more times among those (up to four) tiles is cleared, so two pairs clear together.
 3. **Miss**: A tap that clears nothing costs 10 seconds. Tapping a tile does nothing.
 4. **Feedback**: Rays in the tile's colour run from the tapped cell to each cleared tile; misses flash the cell and the time bar.
 5. **Scoring**: 1 point per tile, 200 max.
