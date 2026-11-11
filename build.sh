@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "Building LGT Games Portal for short URLs..."
+rm -rf dist   # start clean so removed games do not linger
 mkdir -p dist
 
 # Copy portal root files

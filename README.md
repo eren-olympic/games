@@ -33,4 +33,8 @@ python3 -m http.server 8000
 Navigate to `http://localhost:8000`.
 
 ## Deployment
-This repository is optimized for Zero-Config deployment on Cloudflare Pages or Vercel. Push changes to the `main` branch to trigger an edge deployment.
+Served by the Cloudflare Worker `games` at https://play.lgt.wtf (static assets only, config in `wrangler.jsonc`).
+```bash
+npx wrangler deploy
+```
+This runs `build.sh` (flattens `game/*` into `dist/` so games live at `/<id>/`) and uploads `dist/`. Do not upload the repo root directly: the portal links in `data/games.json` only resolve against the built `dist/`.

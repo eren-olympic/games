@@ -1,0 +1,14 @@
+// Static assets Worker for play.lgt.wtf.
+// `npx wrangler deploy` runs build.sh first, then uploads dist/ (flattened short URLs).
+// Settings mirror what was live before this file existed (2026-11-11).
+{
+  "name": "games",
+  "compatibility_date": "2026-07-29",
+  "compatibility_flags": ["nodejs_compat"],
+  "build": { "command": "./build.sh" },
+  "assets": { "directory": "./dist" },
+  "routes": [{ "pattern": "play.lgt.wtf", "custom_domain": true }],
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": true } }
+}
