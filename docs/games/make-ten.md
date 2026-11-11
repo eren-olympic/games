@@ -2,7 +2,7 @@
 
 ## Overview
 *   **Genre**: Timed arithmetic puzzle
-*   **Aesthetic**: Dark / light theme, per-digit colour tints on rounded tiles
+*   **Aesthetic**: Three themes (dark, light, neubrutalism: thick black outlines, hard offset shadows, flat saturated colours), per-digit colour tints on rounded tiles
 *   **Engine**: Vanilla JS, single file, DOM grid
 
 ## Core Mechanics
@@ -15,4 +15,7 @@
 7. **Mobile**: On portrait screens under 760px the board is transposed to 10 × 17; the rule is unaffected because rectangles stay rectangles.
 
 ## Controls
-`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board
+`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board · `T` next theme
+
+## Themes
+The palette button in the header opens a menu: 深色 (dark, default), 淺色 (light), 新粗獷 (neubrutalism). The choice is saved in localStorage. Neubrutalism loads Archivo Black from Google Fonts for numerals and headings.

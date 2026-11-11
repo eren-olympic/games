@@ -2,7 +2,7 @@
 
 ## Overview
 *   **Genre**: Timed visual-matching puzzle
-*   **Aesthetic**: Dark / light theme, ten tile colours, optional shape glyphs for colour-blind play
+*   **Aesthetic**: Three themes (dark, light, neubrutalism: thick black outlines, hard offset shadows, flat saturated colours), ten tile colours, optional shape glyphs for colour-blind play
 *   **Engine**: Vanilla JS, single file, DOM grid
 
 ## Core Mechanics
@@ -15,4 +15,7 @@
 7. **Session / mobile**: Same as Make Ten: blurred board before start and while paused, auto-pause on focus loss, best score / theme / colour-blind mode in localStorage, transposed board on portrait phones.
 
 ## Controls
-`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board · `C` colour-blind glyphs
+`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board · `T` next theme · `C` colour-blind glyphs
+
+## Themes
+The palette button in the header opens a menu: 深色 (dark, default), 淺色 (light), 新粗獷 (neubrutalism). The choice is saved in localStorage. Neubrutalism loads Archivo Black from Google Fonts for numerals and headings.
