@@ -61,5 +61,23 @@
     "url": "/killer-sudoku/",
     "bg": "radial-gradient(circle at top left, #7c8cff 0%, #0e1016 100%)",
     "opacity": "0.9"
+  },
+  {
+    "id": "make-ten",
+    "title": "湊十 Make Ten",
+    "category": "puzzle",
+    "desc": "Drag a box over numbers that add up to exactly 10 to clear them. Two minutes, 170 tiles, empty cells count as zero.",
+    "url": "/make-ten/",
+    "bg": "radial-gradient(circle at top right, #ffc46b 0%, #0e1016 100%)",
+    "opacity": "0.9"
+  },
+  {
+    "id": "cross-pop",
+    "title": "十字消 Cross Pop",
+    "category": "puzzle",
+    "desc": "Tap an empty cell: the nearest tile in each of the four directions pops if it matches another. Misses cost 10 seconds.",
+    "url": "/cross-pop/",
+    "bg": "radial-gradient(circle at bottom left, #22d3ee 0%, #8b5cf6 45%, #0e1016 100%)",
+    "opacity": "0.9"
   }
 ]

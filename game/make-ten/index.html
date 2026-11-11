@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="version" content="1.0.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>湊十 · Make Ten</title>
+<style>
+:root{
+  --bg:#0e1016;--panel:#161922;--panel2:#1c202b;--border:#262b38;
+  --tile:#232838;--tileedge:#141823;--slot:#151821;
+  --selbg:#34407a;--okbg:#1f8a5f;--overbg:#7a2a36;
+  --accent:#7c8cff;--accent2:#a78bfa;--err:#ff6b7a;--ok:#5fd3a0;--warn:#ffb454;
+  --text:#e6e8ee;--muted:#8b93a7;--shadow:0 10px 40px rgba(0,0,0,.45);
+  --d1:#8fb0ff;--d2:#7fd6ff;--d3:#6ee7c8;--d4:#9be37a;--d5:#e8e06a;--d6:#ffc46b;--d7:#ff9f6b;--d8:#ff8a9a;--d9:#e39bff;
+}
+:root.light{
+  --bg:#eef0f6;--panel:#ffffff;--panel2:#f5f6fa;--border:#e1e4ec;
+  --tile:#ffffff;--tileedge:#cfd4e2;--slot:#e4e7ef;
+  --selbg:#c7d1ff;--okbg:#3ccf8e;--overbg:#ffc2ca;
+  --accent:#4f5bff;--accent2:#8b5cf6;--err:#e5354a;--ok:#139a63;--warn:#c77700;
+  --text:#1b2133;--muted:#6b7389;--shadow:0 10px 40px rgba(30,40,80,.12);
+  --d1:#3d5afe;--d2:#0288d1;--d3:#00897b;--d4:#43a047;--d5:#9e9d24;--d6:#ef8f00;--d7:#e65100;--d8:#d81b60;--d9:#8e24aa;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;transition:background .25s}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.app{max-width:1100px;margin:0 auto;padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:.3px}
+.logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 14px rgba(124,140,255,.35)}
+.logo .en{color:var(--muted);font-weight:500;font-size:14px}
+.spacer{flex:1}
+.stat{display:flex;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.stat b{color:var(--text);font-weight:700;font-size:20px;min-width:2ch;text-align:right}
+.iconbtn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);transition:.15s}
+.iconbtn:hover{border-color:var(--accent)}
+.iconbtn svg{width:18px;height:18px}
+.primary{padding:10px 22px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(124,140,255,.3)}
+.primary:hover{filter:brightness(1.08)}
+
+main{display:flex;justify-content:center}
+.wrap{display:flex;flex-direction:column;gap:10px;padding:0 10px 10px;touch-action:none}
+.timebar{position:relative;height:10px;border-radius:10px;background:var(--panel2);border:1px solid var(--border);overflow:hidden}
+.timebar i{position:absolute;inset:0;transform-origin:left;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:background .3s}
+.timebar.low i{background:linear-gradient(90deg,var(--err),var(--warn))}
+.timerow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timerow b{color:var(--text)}
+.timerow .low b{color:var(--err)}
+.board{position:relative;display:grid;border-radius:14px;background:var(--panel);box-shadow:var(--shadow);padding:6px;box-sizing:content-box;touch-action:none;cursor:crosshair}
+.cell{padding:calc(var(--cell)*.07);position:relative}
+.t{width:100%;height:100%;border-radius:30%;display:grid;place-items:center;font-weight:700;font-size:calc(var(--cell)*.5);line-height:1;
+  background:var(--tile);box-shadow:inset 0 calc(var(--cell)*-.06) 0 var(--tileedge);color:var(--c);
+  transition:transform .28s cubic-bezier(.3,1.6,.5,1),opacity .22s,background .08s,color .08s}
+.cell::before{content:"";position:absolute;inset:calc(var(--cell)*.38);border-radius:50%;background:var(--slot);opacity:0;transition:opacity .3s}
+.cell.empty::before{opacity:1}
+.cell.empty .t{transform:scale(.2);opacity:0}
+.cell[data-v="1"]{--c:var(--d1)}.cell[data-v="2"]{--c:var(--d2)}.cell[data-v="3"]{--c:var(--d3)}
+.cell[data-v="4"]{--c:var(--d4)}.cell[data-v="5"]{--c:var(--d5)}.cell[data-v="6"]{--c:var(--d6)}
+.cell[data-v="7"]{--c:var(--d7)}.cell[data-v="8"]{--c:var(--d8)}.cell[data-v="9"]{--c:var(--d9)}
+.cell.sel .t{background:var(--selbg);transform:scale(.94)}
+.board.ok .cell.sel .t{background:var(--okbg);color:#fff}
+.board.over .cell.sel .t{background:var(--overbg)}
+.selbox{position:absolute;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:8px;pointer-events:none;display:none}
+.board.ok .selbox{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.board.over .selbox{border-color:var(--err)}
+.sumtag{position:absolute;pointer-events:none;display:none;padding:3px 9px;border-radius:9px;background:var(--panel);border:1px solid var(--border);
+  font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;box-shadow:var(--shadow);white-space:nowrap;z-index:3}
+.board.ok .sumtag{color:var(--ok);border-color:var(--ok)}
+.board.over .sumtag{color:var(--err)}
+.float{position:absolute;pointer-events:none;font-weight:800;font-size:22px;color:var(--ok);animation:up .8s ease-out forwards;z-index:4;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+@keyframes up{from{transform:translate(-50%,-50%);opacity:1}to{transform:translate(-50%,-160%);opacity:0}}
+.board.blur .cell{filter:blur(10px);opacity:.45}
+.cover{position:absolute;inset:0;display:none;place-items:center;z-index:5;text-align:center;cursor:default}
+.cover.show{display:grid}
+.cover .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:24px 30px;box-shadow:var(--shadow);min-width:260px;max-width:90%}
+.cover h2{margin:0 0 8px;font-size:22px}
+.cover p{margin:4px 0;color:var(--muted);font-size:14px;line-height:1.6}
+.cover .big{font-size:48px;font-weight:800;font-variant-numeric:tabular-nums;margin:6px 0 2px;color:var(--text)}
+.cover .rec{color:var(--warn);font-weight:700}
+.cover .primary{margin-top:14px}
+.hint{text-align:center;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}
+kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:1px 6px;border-radius:5px;border:1px solid var(--border);background:var(--panel2);color:var(--muted)}
+/* portal chrome: keep the footer in page flow so it doesn't eat board height */
+html body #global-footer{position:static}
+html body{padding-bottom:0!important}
+@media (max-width:600px){header{gap:8px;flex-wrap:nowrap}.logo{font-size:17px;white-space:nowrap}.stat{white-space:nowrap}.iconbtn{width:32px;height:32px;flex:none}.stat{font-size:12px;gap:4px}.stat b{font-size:17px}.logo .en{display:none}.app{padding:12px 10px}.wrap{padding:0 0 10px}.hint .k{display:none}}
+@media (max-width:400px){.stat.best{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"><div class="mark">10</div>湊十 <span class="en">Make Ten</span></div>
+    <div class="spacer"></div>
+    <div class="stat">分數 <b id="score">0</b></div>
+    <div class="stat best">最佳 <b id="best">0</b></div>
+    <button class="iconbtn" id="pauseBtn" title="暫停 (P)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+    <button class="iconbtn" id="restartBtn" title="新的一局 (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+    <button class="iconbtn" id="themeBtn" title="切換深色／淺色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  </header>
+  <main>
+    <div class="wrap" id="wrap">
+      <div class="timerow"><span>剩餘時間</span><span id="timeTxtWrap"><b id="timeTxt">2:00</b></span></div>
+      <div class="timebar" id="timebar"><i id="timeFill"></i></div>
+      <div class="board blur" id="board">
+        <div class="selbox" id="selbox"></div>
+        <div class="sumtag" id="sumtag"></div>
+        <div class="cover show" id="cover"><div class="card" id="coverCard"></div></div>
+      </div>
+    </div>
+  </main>
+  <div class="hint">
+    <span>拖曳框出長方形，框內數字加起來<b>剛好 10</b> 就消掉</span>
+    <span>空格算 0，可以跨空格框</span>
+    <span class="k"><kbd>P</kbd> 暫停　<kbd>R</kbd> 新的一局</span>
+  </div>
+</div>
+<script>
+'use strict';
+const COLS=17,ROWS=10,TARGET=10,LIMIT=120000,KEY='make-ten';
+const $=s=>document.querySelector(s);
+const board=$('#board'),wrap=$('#wrap'),selbox=$('#selbox'),sumtag=$('#sumtag'),cover=$('#cover'),coverCard=$('#coverCard');
+const opts=Object.assign({theme:'dark',best:0},readJSON(KEY+'-opts'));
+function readJSON(k){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return {}}}
+function saveOpts(){try{localStorage.setItem(KEY+'-opts',JSON.stringify(opts))}catch(e){}}
+
+let grid=[],cells=[],score=0,state='idle',used=0,segStart=0,transposed=false,cellPx=40,drag=null,selected=[];
+
+/* ---------- board ---------- */
+function newBoard(){
+  grid=Array.from({length:ROWS*COLS},()=>1+Math.floor(Math.random()*9));
+  // keep the total a multiple of 10 so a full clear is at least possible on paper
+  let s=grid.reduce((a,b)=>a+b,0);
+  while(s%TARGET){const i=Math.floor(Math.random()*grid.length);if(grid[i]<9){grid[i]++;s++}}
+}
+function build(){
+  cells.forEach(c=>c.remove());cells=[];
+  for(let i=0;i<ROWS*COLS;i++){const d=document.createElement('div');d.className='cell';d.innerHTML='<div class="t"></div>';board.appendChild(d);cells.push(d)}
+}
+function paint(){cells.forEach((d,i)=>{const v=grid[i];d.classList.toggle('empty',!v);if(v){d.dataset.v=v;d.firstChild.textContent=v}})}
+function scr(){return transposed?{sc:ROWS,sr:COLS}:{sc:COLS,sr:ROWS}}
+function layout(){
+  transposed=innerWidth<innerHeight&&innerWidth<760;
+  const {sc,sr}=scr();
+  const appW=$('.app').clientWidth-40;
+  const top=board.getBoundingClientRect().top+scrollY;
+  const availH=innerHeight-top-56;
+  cellPx=Math.max(18,Math.floor(Math.min(appW/sc,availH/sr,58)));
+  board.style.setProperty('--cell',cellPx+'px');
+  board.style.gridTemplateColumns=`repeat(${sc},${cellPx}px)`;
+  board.style.gridTemplateRows=`repeat(${sr},${cellPx}px)`;
+  cells.forEach((d,i)=>{const r=i/COLS|0,c=i%COLS;d.style.gridRow=(transposed?c:r)+1;d.style.gridColumn=(transposed?r:c)+1});
+}
+
+/* ---------- selection ---------- */
+const PAD=6; // board padding
+function local(e){const b=board.getBoundingClientRect();return {x:e.clientX-b.left-PAD,y:e.clientY-b.top-PAD}}
+function cellsIn(d){
+  const {sc,sr}=scr();
+  const x0=Math.min(d.x0,d.x1),x1=Math.max(d.x0,d.x1),y0=Math.min(d.y0,d.y1),y1=Math.max(d.y0,d.y1);
+  // a cell counts when the box covers its centre
+  const c0=Math.max(0,Math.ceil(x0/cellPx-.5)),c1=Math.min(sc-1,Math.floor(x1/cellPx-.5));
+  const r0=Math.max(0,Math.ceil(y0/cellPx-.5)),r1=Math.min(sr-1,Math.floor(y1/cellPx-.5));
+  const out=[];
+  for(let y=r0;y<=r1;y++)for(let x=c0;x<=c1;x++){const r=transposed?x:y,c=transposed?y:x;out.push(r*COLS+c)}
+  return out;
+}
+function showSel(){
+  selected.forEach(i=>cells[i].classList.remove('sel'));
+  if(!drag){selected=[];board.classList.remove('ok','over');selbox.style.display=sumtag.style.display='none';return}
+  selected=cellsIn(drag);
+  let sum=0;selected.forEach(i=>{cells[i].classList.add('sel');sum+=grid[i]});
+  board.classList.toggle('ok',sum===TARGET);board.classList.toggle('over',sum>TARGET);
+  const x0=Math.min(drag.x0,drag.x1),y0=Math.min(drag.y0,drag.y1);
+  Object.assign(selbox.style,{display:'block',left:x0+PAD+'px',top:y0+PAD+'px',width:Math.abs(drag.x1-drag.x0)+'px',height:Math.abs(drag.y1-drag.y0)+'px'});
+  if(selected.length){
+    sumtag.textContent=sum;sumtag.style.display='block';
+    sumtag.style.left=Math.min(drag.x1+PAD+14,board.offsetWidth-40)+'px';
+    sumtag.style.top=Math.max(drag.y1+PAD-34,0)+'px';
+  }else sumtag.style.display='none';
+}
+wrap.addEventListener('pointerdown',e=>{
+  if(state!=='run'||e.button>0||e.target.closest('.cover'))return;
+  e.preventDefault();wrap.setPointerCapture(e.pointerId);
+  const p=local(e);drag={x0:p.x,y0:p.y,x1:p.x,y1:p.y};showSel();
+});
+wrap.addEventListener('pointermove',e=>{if(!drag)return;const p=local(e);drag.x1=p.x;drag.y1=p.y;showSel()});
+wrap.addEventListener('pointerup',()=>{if(!drag)return;commit();drag=null;showSel()});
+wrap.addEventListener('pointercancel',()=>{drag=null;showSel()});
+
+function commit(){
+  if(state!=='run')return;
+  const sum=selected.reduce((a,i)=>a+grid[i],0);
+  if(sum!==TARGET)return;
+  const hit=selected.filter(i=>grid[i]);
+  hit.forEach(i=>{grid[i]=0;cells[i].classList.add('empty')});
+  score+=hit.length;hud();
+  const x=(Math.min(drag.x0,drag.x1)+Math.max(drag.x0,drag.x1))/2+PAD,y=(Math.min(drag.y0,drag.y1)+Math.max(drag.y0,drag.y1))/2+PAD;
+  floatText('+'+hit.length,x,y);
+  if(score===ROWS*COLS)end('clear');else if(!anyMove())end('stuck');
+}
+function floatText(t,x,y){const f=document.createElement('div');f.className='float';f.textContent=t;f.style.left=x+'px';f.style.top=y+'px';board.appendChild(f);setTimeout(()=>f.remove(),800)}
+function anyMove(){
+  const W=COLS+1,P=new Int32Array((ROWS+1)*W);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)P[(r+1)*W+c+1]=grid[r*COLS+c]+P[r*W+c+1]+P[(r+1)*W+c]-P[r*W+c];
+  for(let r0=0;r0<ROWS;r0++)for(let r1=r0;r1<ROWS;r1++)for(let c0=0;c0<COLS;c0++)for(let c1=c0;c1<COLS;c1++){
+    const s=P[(r1+1)*W+c1+1]-P[r0*W+c1+1]-P[(r1+1)*W+c0]+P[r0*W+c0];
+    if(s===TARGET)return true;if(s>TARGET)break;
+  }
+  return false;
+}
+
+/* ---------- time & flow ---------- */
+function left(){return Math.max(0,LIMIT-used-(state==='run'?performance.now()-segStart:0))}
+function drawTime(){
+  const t=left(),s=Math.ceil(t/1000),low=t<15000;
+  $('#timeFill').style.transform=`scaleX(${t/LIMIT})`;
+  $('#timeTxt').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  $('#timebar').classList.toggle('low',low);$('#timeTxtWrap').classList.toggle('low',low);
+}
+function tick(){if(state!=='run')return;drawTime();if(left()<=0){end('time');return}requestAnimationFrame(tick)}
+function hud(){$('#score').textContent=score;$('#best').textContent=opts.best}
+function setCover(html){coverCard.innerHTML=html;cover.classList.toggle('show',!!html);board.classList.toggle('blur',!!html&&state!=='over')}
+function idle(){
+  state='idle';used=0;score=0;drag=null;showSel();newBoard();paint();hud();drawTime();
+  setCover(`<h2>湊十</h2><p>拖曳框出長方形，框內數字總和<b>剛好 10</b> 就消掉。<br>每消一顆得 1 分，限時 2 分鐘。</p><button class="primary" data-act="start">開始（Enter）</button>`);
+}
+function start(){if(state!=='idle'&&state!=='pause')return;state='run';segStart=performance.now();setCover('');requestAnimationFrame(tick)}
+function pause(){if(state!=='run')return;used+=performance.now()-segStart;state='pause';drag=null;showSel();
+  setCover(`<h2>已暫停</h2><p>盤面先遮起來，回來再繼續。</p><button class="primary" data-act="start">繼續（Enter）</button>`)}
+function end(why){
+  if(state==='run')used+=performance.now()-segStart;
+  state='over';drag=null;showSel();drawTime();
+  const rec=score>opts.best;if(rec){opts.best=score;saveOpts()}hud();
+  const title={time:'時間到',stuck:'沒有能湊 10 的組合了',clear:'全部清空！'}[why];
+  const extra=why==='clear'?`<p>還剩 ${Math.ceil(left()/1000)} 秒</p>`:'';
+  setCover(`<h2>${title}</h2><div class="big">${score}</div><p>${rec?'<span class="rec">新紀錄！</span>':'最佳 '+opts.best}　·　${ROWS*COLS} 顆中消了 ${score} 顆</p>${extra}<button class="primary" data-act="again">再玩一局（Enter）</button>`);
+}
+cover.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a)return;if(a.dataset.act==='start')start();else{idle();start()}});
+$('#pauseBtn').onclick=()=>state==='run'?pause():start();
+$('#restartBtn').onclick=idle;
+$('#themeBtn').onclick=()=>{opts.theme=opts.theme==='light'?'dark':'light';applyTheme();saveOpts()};
+function applyTheme(){document.documentElement.classList.toggle('light',opts.theme==='light')}
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(k==='enter'||k===' '){e.preventDefault();if(state==='over'){idle();start()}else if(state!=='run')start()}
+  else if(k==='p'||k==='escape'){state==='run'?pause():state==='pause'&&start()}
+  else if(k==='r')idle();
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
+addEventListener('blur',pause);
+addEventListener('resize',layout);
+addEventListener('load',layout);
+document.addEventListener('DOMContentLoaded',()=>setTimeout(layout,0));
+
+applyTheme();build();idle();layout();
+</script>
+<script src="/shared/layout.js"></script>
+</body>
+</html>

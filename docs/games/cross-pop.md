@@ -1,0 +1,18 @@
+# Cross Pop (十字消) Specification
+
+## Overview
+*   **Genre**: Timed visual-matching puzzle
+*   **Aesthetic**: Dark / light theme, ten tile colours, optional shape glyphs for colour-blind play
+*   **Engine**: Vanilla JS, single file, DOM grid
+
+## Core Mechanics
+1. **Board**: 23 × 15 cells holding 200 tiles, exactly 20 in each of 10 colours, scattered at random; the other 145 cells are empty.
+2. **Move**: Tap an empty cell. From it, the nearest tile up, down, left and right is found (skipping empty cells). Every colour that appears two or more times among those (up to four) tiles is cleared, so two pairs clear together.
+3. **Miss**: A tap that clears nothing costs 10 seconds. Tapping a tile does nothing.
+4. **Feedback**: Rays in the tile's colour run from the tapped cell to each cleared tile; misses flash the cell and the time bar.
+5. **Scoring**: 1 point per tile, 200 max.
+6. **End**: Time runs out, all 200 tiles are cleared, or no empty cell would clear anything.
+7. **Session / mobile**: Same as Make Ten: blurred board before start and while paused, auto-pause on focus loss, best score / theme / colour-blind mode in localStorage, transposed board on portrait phones.
+
+## Controls
+`Enter` / `Space` start or replay · `P` / `Esc` pause · `R` new board · `C` colour-blind glyphs

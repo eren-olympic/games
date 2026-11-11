@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="version" content="1.0.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>十字消 · Cross Pop</title>
+<style>
+:root{
+  --bg:#0e1016;--panel:#161922;--panel2:#1c202b;--border:#262b38;
+  --slot:#1d2130;--slothover:#2d3550;
+  --accent:#7c8cff;--accent2:#a78bfa;--err:#ff6b7a;--ok:#5fd3a0;--warn:#ffb454;
+  --text:#e6e8ee;--muted:#8b93a7;--shadow:0 10px 40px rgba(0,0,0,.45);
+  --k0:#ef4444;--k1:#f97316;--k2:#facc15;--k3:#84cc16;--k4:#10b981;--k5:#22d3ee;--k6:#3b82f6;--k7:#8b5cf6;--k8:#ec4899;--k9:#a8744a;
+}
+:root.light{
+  --bg:#eef0f6;--panel:#ffffff;--panel2:#f5f6fa;--border:#e1e4ec;
+  --slot:#eceef4;--slothover:#d5dbf5;
+  --accent:#4f5bff;--accent2:#8b5cf6;--err:#e5354a;--ok:#139a63;--warn:#c77700;
+  --text:#1b2133;--muted:#6b7389;--shadow:0 10px 40px rgba(30,40,80,.12);
+  --k0:#e53935;--k1:#f57c00;--k2:#f2c200;--k3:#7cb342;--k4:#00a37a;--k5:#00acc1;--k6:#2f6fe4;--k7:#7e57c2;--k8:#e0457b;--k9:#8d6e63;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;transition:background .25s}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.app{max-width:1200px;margin:0 auto;padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:.3px}
+.logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;font-size:17px;font-weight:800;box-shadow:0 4px 14px rgba(124,140,255,.35)}
+.logo .en{color:var(--muted);font-weight:500;font-size:14px}
+.spacer{flex:1}
+.stat{display:flex;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.stat b{color:var(--text);font-weight:700;font-size:20px;min-width:2ch;text-align:right}
+.iconbtn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);transition:.15s}
+.iconbtn:hover{border-color:var(--accent)}
+.iconbtn.on{border-color:var(--accent);color:var(--accent)}
+.iconbtn svg{width:18px;height:18px}
+.primary{padding:10px 22px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(124,140,255,.3)}
+.primary:hover{filter:brightness(1.08)}
+
+main{display:flex;justify-content:center}
+.wrap{display:flex;flex-direction:column;gap:10px;padding-bottom:10px}
+.timebar{position:relative;height:10px;border-radius:10px;background:var(--panel2);border:1px solid var(--border);overflow:hidden}
+.timebar i{position:absolute;inset:0;transform-origin:left;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.timebar.low i{background:linear-gradient(90deg,var(--err),var(--warn))}
+.timebar.hit{animation:hit .45s}
+@keyframes hit{30%{box-shadow:0 0 0 3px var(--err)}}
+.timerow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.timerow b{color:var(--text)}
+.timerow .low b{color:var(--err)}
+.board{position:relative;display:grid;border-radius:14px;background:var(--panel);box-shadow:var(--shadow);padding:6px;box-sizing:content-box;touch-action:manipulation}
+.cell{position:relative;padding:calc(var(--cell)*.06)}
+.cell::before{content:"";position:absolute;inset:calc(var(--cell)*.06);border-radius:24%;background:var(--slot);transition:background .1s}
+.board.live .cell.empty{cursor:pointer}
+@media (hover:hover){.board.live .cell.empty:hover::before{background:var(--slothover)}}
+.t{position:relative;width:100%;height:100%;border-radius:24%;background:var(--c);
+  box-shadow:inset 0 calc(var(--cell)*-.08) 0 rgba(0,0,0,.22),inset 0 calc(var(--cell)*.06) 0 rgba(255,255,255,.22);
+  display:grid;place-items:center;color:rgba(0,0,0,.55);font-size:calc(var(--cell)*.5);line-height:1;
+  transition:transform .3s cubic-bezier(.4,1.8,.5,1),opacity .25s}
+.t::after{content:var(--g);display:none}
+.board.cb .t::after{display:block}
+.cell.empty .t{transform:scale(0);opacity:0}
+.cell[data-k="0"]{--c:var(--k0);--g:"●"}.cell[data-k="1"]{--c:var(--k1);--g:"▲"}.cell[data-k="2"]{--c:var(--k2);--g:"■"}
+.cell[data-k="3"]{--c:var(--k3);--g:"◆"}.cell[data-k="4"]{--c:var(--k4);--g:"★"}.cell[data-k="5"]{--c:var(--k5);--g:"+"}
+.cell[data-k="6"]{--c:var(--k6);--g:"○"}.cell[data-k="7"]{--c:var(--k7);--g:"▼"}.cell[data-k="8"]{--c:var(--k8);--g:"♥\FE0E"}
+.cell[data-k="9"]{--c:var(--k9);--g:"×"}
+.ray{position:absolute;pointer-events:none;border-radius:4px;background:var(--c);opacity:.9;animation:ray .45s ease-out forwards;z-index:2}
+@keyframes ray{to{opacity:0}}
+.miss{position:absolute;pointer-events:none;border-radius:24%;border:3px solid var(--err);animation:miss .5s ease-out forwards;z-index:3}
+@keyframes miss{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.float{position:absolute;pointer-events:none;font-weight:800;font-size:20px;animation:up .8s ease-out forwards;z-index:4;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+.float.good{color:var(--ok)}.float.bad{color:var(--err)}
+@keyframes up{from{transform:translate(-50%,-50%);opacity:1}to{transform:translate(-50%,-170%);opacity:0}}
+.board.blur .cell{filter:blur(10px);opacity:.45}
+.cover{position:absolute;inset:0;display:none;place-items:center;z-index:5;text-align:center}
+.cover.show{display:grid}
+.cover .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:24px 30px;box-shadow:var(--shadow);min-width:260px;max-width:90%}
+.cover h2{margin:0 0 8px;font-size:22px}
+.cover p{margin:4px 0;color:var(--muted);font-size:14px;line-height:1.6}
+.cover .big{font-size:48px;font-weight:800;font-variant-numeric:tabular-nums;margin:6px 0 2px;color:var(--text)}
+.cover .rec{color:var(--warn);font-weight:700}
+.cover .primary{margin-top:14px}
+.hint{text-align:center;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}
+kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:1px 6px;border-radius:5px;border:1px solid var(--border);background:var(--panel2);color:var(--muted)}
+html body #global-footer{position:static}
+html body{padding-bottom:0!important}
+@media (max-width:600px){header{gap:8px;flex-wrap:nowrap}.logo{font-size:17px;white-space:nowrap}.stat{white-space:nowrap}.iconbtn{width:32px;height:32px;flex:none}.stat{font-size:12px;gap:4px}.stat b{font-size:17px}.logo .en{display:none}.app{padding:12px 10px}.hint .k{display:none}}
+@media (max-width:400px){.stat.best{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"><div class="mark">✛</div>十字消 <span class="en">Cross Pop</span></div>
+    <div class="spacer"></div>
+    <div class="stat">分數 <b id="score">0</b></div>
+    <div class="stat best">最佳 <b id="best">0</b></div>
+    <button class="iconbtn" id="cbBtn" title="色盲模式：方塊加上圖形 (C)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button class="iconbtn" id="pauseBtn" title="暫停 (P)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+    <button class="iconbtn" id="restartBtn" title="新的一局 (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+    <button class="iconbtn" id="themeBtn" title="切換深色／淺色"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="timerow"><span>剩餘時間</span><span id="timeTxtWrap"><b id="timeTxt">2:00</b></span></div>
+      <div class="timebar" id="timebar"><i id="timeFill"></i></div>
+      <div class="board blur" id="board">
+        <div class="cover show" id="cover"><div class="card" id="coverCard"></div></div>
+      </div>
+    </div>
+  </main>
+  <div class="hint">
+    <span>點<b>空格</b>：上下左右各找最近的方塊，同色的消掉</span>
+    <span>沒消到扣 10 秒</span>
+    <span class="k"><kbd>C</kbd> 色盲模式　<kbd>P</kbd> 暫停　<kbd>R</kbd> 新的一局</span>
+  </div>
+</div>
+<script>
+'use strict';
+const COLS=23,ROWS=15,COLORS=10,PER=20,TOTAL=COLORS*PER,LIMIT=120000,PENALTY=10000,KEY='cross-pop';
+const $=s=>document.querySelector(s);
+const board=$('#board'),cover=$('#cover'),coverCard=$('#coverCard');
+const opts=Object.assign({theme:'dark',best:0,cb:false},readJSON(KEY+'-opts'));
+function readJSON(k){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return {}}}
+function saveOpts(){try{localStorage.setItem(KEY+'-opts',JSON.stringify(opts))}catch(e){}}
+
+let grid=new Int8Array(ROWS*COLS),cells=[],score=0,state='idle',used=0,penalty=0,segStart=0,transposed=false,cellPx=36;
+
+/* ---------- board ---------- */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newBoard(){
+  grid.fill(-1);
+  const spots=shuffle([...Array(ROWS*COLS).keys()]).slice(0,TOTAL);
+  const colors=shuffle(Array.from({length:TOTAL},(_,i)=>i%COLORS));
+  spots.forEach((p,i)=>grid[p]=colors[i]);
+}
+function build(){
+  cells.forEach(c=>c.remove());cells=[];
+  for(let i=0;i<ROWS*COLS;i++){const d=document.createElement('div');d.className='cell';d.dataset.i=i;d.innerHTML='<div class="t"></div>';board.appendChild(d);cells.push(d)}
+}
+function paint(){cells.forEach((d,i)=>{const k=grid[i];d.classList.toggle('empty',k<0);if(k>=0)d.dataset.k=k})}
+function layout(){
+  transposed=innerWidth<innerHeight&&innerWidth<760;
+  const sc=transposed?ROWS:COLS,sr=transposed?COLS:ROWS;
+  const app=$('.app'),cs=getComputedStyle(app);
+  const appW=app.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-12;
+  const top=board.getBoundingClientRect().top+scrollY;
+  const availH=innerHeight-top-56;
+  cellPx=Math.max(16,Math.floor(Math.min(appW/sc,availH/sr,48)));
+  board.style.setProperty('--cell',cellPx+'px');
+  board.style.gridTemplateColumns=`repeat(${sc},${cellPx}px)`;
+  board.style.gridTemplateRows=`repeat(${sr},${cellPx}px)`;
+  cells.forEach((d,i)=>{const r=i/COLS|0,c=i%COLS;d.style.gridRow=(transposed?c:r)+1;d.style.gridColumn=(transposed?r:c)+1});
+}
+// centre of a logical cell in board pixels (board has 6px padding)
+function centre(i){const r=i/COLS|0,c=i%COLS,x=transposed?r:c,y=transposed?c:r;return {x:6+(x+.5)*cellPx,y:6+(y+.5)*cellPx}}
+
+/* ---------- rules ---------- */
+const DIRS=[[-1,0],[1,0],[0,-1],[0,1]];
+function nearest(i){
+  const out=[],r0=i/COLS|0,c0=i%COLS;
+  for(const [dr,dc] of DIRS){let r=r0+dr,c=c0+dc;
+    while(r>=0&&r<ROWS&&c>=0&&c<COLS){if(grid[r*COLS+c]>=0){out.push(r*COLS+c);break}r+=dr;c+=dc}}
+  return out;
+}
+function matches(i){
+  const nb=nearest(i),cnt={};nb.forEach(j=>cnt[grid[j]]=(cnt[grid[j]]||0)+1);
+  return nb.filter(j=>cnt[grid[j]]>=2);
+}
+function anyMove(){for(let i=0;i<grid.length;i++)if(grid[i]<0&&matches(i).length)return true;return false}
+
+board.addEventListener('pointerdown',e=>{
+  if(state!=='run'||e.button>0)return;
+  const d=e.target.closest('.cell');if(!d)return;
+  const i=+d.dataset.i;if(grid[i]>=0)return; // tapping a tile does nothing
+  e.preventDefault();play(i);
+});
+function play(i){
+  const hit=matches(i),o=centre(i);
+  if(hit.length){
+    hit.forEach(j=>{ray(o,centre(j),grid[j]);grid[j]=-1;cells[j].classList.add('empty')});
+    score+=hit.length;hud();floatText('+'+hit.length,o,'good');
+    if(score===TOTAL)end('clear');else if(!anyMove())end('stuck');
+  }else{
+    penalty+=PENALTY;floatText('−10 秒',o,'bad');
+    const m=document.createElement('div');m.className='miss';
+    Object.assign(m.style,{left:o.x-cellPx/2+'px',top:o.y-cellPx/2+'px',width:cellPx+'px',height:cellPx+'px'});
+    board.appendChild(m);setTimeout(()=>m.remove(),500);
+    const tb=$('#timebar');tb.classList.remove('hit');void tb.offsetWidth;tb.classList.add('hit');
+    drawTime();if(left()<=0)end('time');
+  }
+}
+function ray(a,b,k){
+  const r=document.createElement('div'),w=Math.max(3,cellPx*.12);r.className='ray';r.style.setProperty('--c',`var(--k${k})`);
+  if(Math.abs(a.y-b.y)<1)Object.assign(r.style,{left:Math.min(a.x,b.x)+'px',top:a.y-w/2+'px',width:Math.abs(a.x-b.x)+'px',height:w+'px'});
+  else Object.assign(r.style,{left:a.x-w/2+'px',top:Math.min(a.y,b.y)+'px',width:w+'px',height:Math.abs(a.y-b.y)+'px'});
+  board.appendChild(r);setTimeout(()=>r.remove(),450);
+}
+function floatText(t,o,cls){const f=document.createElement('div');f.className='float '+cls;f.textContent=t;f.style.left=o.x+'px';f.style.top=o.y+'px';board.appendChild(f);setTimeout(()=>f.remove(),800)}
+
+/* ---------- time & flow ---------- */
+function left(){return Math.max(0,LIMIT-penalty-used-(state==='run'?performance.now()-segStart:0))}
+function drawTime(){
+  const t=left(),s=Math.ceil(t/1000),low=t<15000;
+  $('#timeFill').style.transform=`scaleX(${t/LIMIT})`;
+  $('#timeTxt').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  $('#timebar').classList.toggle('low',low);$('#timeTxtWrap').classList.toggle('low',low);
+}
+function tick(){if(state!=='run')return;drawTime();if(left()<=0){end('time');return}requestAnimationFrame(tick)}
+function hud(){$('#score').textContent=score;$('#best').textContent=opts.best}
+function setCover(html){coverCard.innerHTML=html;cover.classList.toggle('show',!!html);board.classList.toggle('blur',!!html&&state!=='over');board.classList.toggle('live',state==='run')}
+function idle(){
+  state='idle';used=0;penalty=0;score=0;newBoard();paint();hud();drawTime();
+  setCover(`<h2>十字消</h2><p>點一個<b>空格</b>，往上下左右各找最近的方塊，<br>其中同色的會一起消掉。沒消到扣 10 秒。<br>每消一個得 1 分，限時 2 分鐘。</p><button class="primary" data-act="start">開始（Enter）</button>`);
+}
+function start(){if(state!=='idle'&&state!=='pause')return;state='run';segStart=performance.now();setCover('');requestAnimationFrame(tick)}
+function pause(){if(state!=='run')return;used+=performance.now()-segStart;state='pause';
+  setCover(`<h2>已暫停</h2><p>盤面先遮起來，回來再繼續。</p><button class="primary" data-act="start">繼續（Enter）</button>`)}
+function end(why){
+  if(state==='run')used+=performance.now()-segStart;
+  state='over';drawTime();
+  const rec=score>opts.best;if(rec){opts.best=score;saveOpts()}hud();
+  const title={time:'時間到',stuck:'沒有能消的空格了',clear:'全部清空！'}[why];
+  const extra=why==='clear'?`<p>還剩 ${Math.ceil(left()/1000)} 秒</p>`:'';
+  setCover(`<h2>${title}</h2><div class="big">${score}</div><p>${rec?'<span class="rec">新紀錄！</span>':'最佳 '+opts.best}　·　${TOTAL} 個中消了 ${score} 個</p>${extra}<button class="primary" data-act="again">再玩一局（Enter）</button>`);
+}
+cover.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a)return;if(a.dataset.act==='start')start();else{idle();start()}});
+$('#pauseBtn').onclick=()=>state==='run'?pause():start();
+$('#restartBtn').onclick=idle;
+$('#themeBtn').onclick=()=>{opts.theme=opts.theme==='light'?'dark':'light';applyOpts();saveOpts()};
+$('#cbBtn').onclick=()=>{opts.cb=!opts.cb;applyOpts();saveOpts()};
+function applyOpts(){document.documentElement.classList.toggle('light',opts.theme==='light');board.classList.toggle('cb',opts.cb);$('#cbBtn').classList.toggle('on',opts.cb)}
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(k==='enter'||k===' '){e.preventDefault();if(state==='over'){idle();start()}else if(state!=='run')start()}
+  else if(k==='p'||k==='escape'){state==='run'?pause():state==='pause'&&start()}
+  else if(k==='r')idle();
+  else if(k==='c')$('#cbBtn').click();
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
+addEventListener('blur',pause);
+addEventListener('resize',layout);
+addEventListener('load',layout);
+document.addEventListener('DOMContentLoaded',()=>setTimeout(layout,0));
+
+applyOpts();build();idle();layout();
+</script>
+<script src="/shared/layout.js"></script>
+</body>
+</html>

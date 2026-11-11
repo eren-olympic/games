@@ -22,7 +22,10 @@ LGT Games Portal provides a unified layout and execution environment for standal
     ├── hitori/
     ├── 2048/
     ├── snake/
-    └── minesweeper/
+    ├── minesweeper/
+    ├── killer-sudoku/
+    ├── make-ten/
+    └── cross-pop/
 ```
 
 ## Local Development Environment
