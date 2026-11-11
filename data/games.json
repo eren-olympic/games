@@ -52,5 +52,14 @@
     "url": "/2048/",
     "bg": "linear-gradient(135deg, #edc22e 0%, #f59563 100%)",
     "opacity": "0.85"
+  },
+  {
+    "id": "killer-sudoku",
+    "title": "殺手數獨 Killer Sudoku",
+    "category": "logic",
+    "desc": "Sudoku with cage sums instead of givens. Fast note shortcuts, cage combo helper, four difficulties with unique solutions.",
+    "url": "/killer-sudoku/",
+    "bg": "radial-gradient(circle at top left, #7c8cff 0%, #0e1016 100%)",
+    "opacity": "0.9"
   }
 ]

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="version" content="1.0.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>殺手數獨 · Killer Sudoku</title>
+<style>
+:root{
+  --bg:#0e1016;--panel:#161922;--panel2:#1c202b;--border:#262b38;
+  --cell:#181c26;--peer:#1f2431;--cagehl:#1d2333;--same:#2a3557;--sel:#34407a;--selmulti:#2d3768;
+  --thin:#2a3040;--thick:#7d869c;--cage:#6a7389;--sum:#c4cbdb;
+  --given:#eef0f5;--user:#8fb0ff;--note:#9aa3b8;--hit:#ffd479;
+  --accent:#7c8cff;--accent2:#a78bfa;--err:#ff6b7a;--errbg:#3a1f28;--ok:#5fd3a0;
+  --text:#e6e8ee;--muted:#8b93a7;--shadow:0 10px 40px rgba(0,0,0,.45);
+}
+:root.light{
+  --bg:#eef0f6;--panel:#ffffff;--panel2:#f5f6fa;--border:#e1e4ec;
+  --cell:#ffffff;--peer:#eef1f8;--cagehl:#f0f3fb;--same:#d7defb;--sel:#b9c6fd;--selmulti:#cbd5fd;
+  --thin:#d8dce6;--thick:#323a4f;--cage:#8790a5;--sum:#2f364a;
+  --given:#1b2133;--user:#3d5afe;--note:#566078;--hit:#c77700;
+  --accent:#4f5bff;--accent2:#8b5cf6;--err:#e5354a;--errbg:#fde3e6;--ok:#139a63;
+  --text:#1b2133;--muted:#6b7389;--shadow:0 10px 40px rgba(30,40,80,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;transition:background .25s}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.app{max-width:1080px;margin:0 auto;padding:18px 20px 28px;display:flex;flex-direction:column;gap:16px;min-height:100%}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:.3px}
+.logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;font-size:16px;box-shadow:0 4px 14px rgba(124,140,255,.35)}
+.diffs{display:flex;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:3px;gap:2px}
+.diffs button{padding:6px 12px;border-radius:9px;font-size:14px;color:var(--muted);transition:.15s}
+.diffs button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
+.diffs button:hover{color:var(--text)}
+.spacer{flex:1}
+.stat{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.stat b{color:var(--text);font-weight:600}
+.iconbtn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);transition:.15s}
+.iconbtn:hover{border-color:var(--accent)}
+.iconbtn svg{width:18px;height:18px}
+.primary{padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;font-size:14px;box-shadow:0 4px 14px rgba(124,140,255,.3)}
+.primary:hover{filter:brightness(1.08)}
+
+main{display:flex;gap:22px;align-items:flex-start;justify-content:center}
+.boardwrap{position:relative;flex:none}
+.board{--size:min(calc(100vw - 40px),calc(100vh - 120px - var(--chrome,0px)),640px);width:var(--size);height:var(--size);position:relative;
+  border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:var(--cell);touch-action:none;container-type:size}
+.cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr)}
+.cell{position:relative;background:var(--cell);display:grid;place-items:center;cursor:pointer;transition:background .08s}
+.cell.cagehl{background:var(--cagehl)}
+.cell.peer{background:var(--peer)}
+.cell.same{background:var(--same)}
+.cell.sel{background:var(--selmulti)}
+.cell.cur{background:var(--sel)}
+.cell.err .v{color:var(--err)}
+.cell.err.wrong{background:var(--errbg)}
+.v{font-size:6.2cqw;font-weight:500;color:var(--user);line-height:1}
+.cell.given .v{color:var(--given);font-weight:600}
+.cell.hinted .v{color:var(--ok)}
+.notes{position:absolute;inset:23% 7% 5% 7%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.notes i{font-style:normal;font-size:2.15cqw;color:var(--note);display:grid;place-items:center;line-height:1;font-weight:500;opacity:0}
+.notes i.on{opacity:1}
+.notes i.hit{color:var(--hit);font-weight:700}
+.overlay-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.board.paused .cells,.board.paused svg{filter:blur(14px);opacity:.5}
+.cover{position:absolute;inset:0;display:none;place-items:center;z-index:5;text-align:center}
+.cover.show{display:grid}
+.cover .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:26px 30px;box-shadow:var(--shadow);min-width:240px}
+.cover h2{margin:0 0 6px;font-size:22px}
+.cover p{margin:4px 0 16px;color:var(--muted);font-size:14px}
+.spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:sp 0.8s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.board.win .cell{animation:pop .6s ease both}
+@keyframes pop{40%{transform:scale(.88);background:var(--same)}}
+
+aside{width:330px;display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px}
+.panel h3{margin:0 0 10px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+.cageinfo{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;white-space:nowrap;overflow:hidden}
+.cageinfo .big{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.cageinfo .small{color:var(--muted);font-size:13px}
+/* fixed height (3 rows fits the max of 12 combos) so the panels below never shift */
+.combos{display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;height:96px;overflow:auto}
+.combo{padding:4px 8px;border-radius:8px;background:var(--panel2);border:1px solid var(--border);font-size:13px;line-height:18px;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.combo.dead{opacity:.3;text-decoration:line-through}
+.combo.only{border-color:var(--accent);color:var(--accent)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--panel2);padding:4px;border-radius:12px;margin-bottom:12px}
+.modes button{padding:9px;border-radius:9px;font-size:14px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px}
+.modes button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2),inset 0 0 0 1px var(--border)}
+.modes button.on.note{color:var(--accent)}
+kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:1px 6px;border-radius:5px;border:1px solid var(--border);background:var(--panel2);color:var(--muted)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pad button{position:relative;height:58px;border-radius:12px;background:var(--panel2);border:1px solid var(--border);font-size:26px;font-weight:500;transition:.1s;color:var(--text)}
+.pad button:hover{border-color:var(--accent)}
+.pad button:active{transform:scale(.96)}
+.pad button .cnt{position:absolute;right:7px;top:5px;font-size:11px;color:var(--muted);font-weight:500}
+.pad button.done{opacity:.28}
+.pad.notemode button{color:var(--accent);font-size:20px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.actions button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:12px;font-size:12px;color:var(--muted);transition:.15s}
+.actions button:hover{background:var(--panel2);color:var(--text)}
+.actions svg{width:20px;height:20px}
+.toggles{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.toggles label{display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--muted)}
+.sw{appearance:none;width:34px;height:20px;border-radius:20px;background:var(--border);position:relative;cursor:pointer;transition:.2s;margin:0}
+.sw::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+.sw:checked{background:var(--accent)}
+.sw:checked::after{left:16px}
+.hintbar{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 12px}
+.hintbar span{display:flex;align-items:center;gap:5px}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:20;backdrop-filter:blur(4px)}
+.help.show{display:grid}
+.help .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px 26px;box-shadow:var(--shadow);width:min(560px,92vw);max-height:88vh;overflow:auto}
+.help h2{margin:0 0 14px;font-size:18px}
+.help table{width:100%;border-collapse:collapse;font-size:14px}
+.help td{padding:6px 4px;border-bottom:1px solid var(--border)}
+.help td:first-child{white-space:nowrap;width:44%}
+.help .sec td{color:var(--muted);font-size:12px;letter-spacing:1px;padding-top:14px;border:0}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--panel);border:1px solid var(--border);padding:9px 16px;border-radius:12px;box-shadow:var(--shadow);font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:30}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media (max-width:980px){
+  main{flex-direction:column;align-items:center}
+  aside{width:min(640px,calc(100vw - 40px))}
+  .board{--size:min(calc(100vw - 40px),640px)}
+  .hintbar{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo"><div class="mark">∑</div>殺手數獨</div>
+    <div class="diffs" id="diffs">
+      <button data-d="easy">簡單</button><button data-d="medium">中等</button><button data-d="hard">困難</button><button data-d="expert">專家</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="stat">錯誤 <b id="mistakes">0</b></div>
+    <div class="stat"><b id="timer">00:00</b></div>
+    <button class="iconbtn" id="pauseBtn" title="暫停 (P)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+    <button class="iconbtn" id="themeBtn" title="切換主題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="iconbtn" id="helpBtn" title="快捷鍵 (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
+    <button class="primary" id="newBtn">新遊戲</button>
+  </header>
+
+  <main>
+    <div class="boardwrap">
+      <div class="board" id="board">
+        <div class="cells" id="cells"></div>
+        <svg class="overlay-svg" id="svg" viewBox="0 0 900 900" preserveAspectRatio="none"></svg>
+        <div class="cover" id="loading"><div class="card"><div class="spin"></div><h2>產生題目中…</h2><p>確保唯一解</p></div></div>
+        <div class="cover" id="pauseCover"><div class="card"><h2>已暫停</h2><p>按 P 或點擊繼續</p><button class="primary" id="resumeBtn">繼續</button></div></div>
+        <div class="cover" id="winCover"><div class="card"><h2>🎉 完成！</h2><p id="winText"></p><button class="primary" id="winNew">再來一題</button></div></div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="panel">
+        <h3><span>籠子</span><span id="cageSize"></span></h3>
+        <div class="cageinfo"><span class="big" id="cageSum">–</span><span class="small" id="cageDetail"></span></div>
+        <div class="combos" id="combos"></div>
+      </div>
+
+      <div class="panel">
+        <div class="modes">
+          <button id="modeNormal" class="on">數字 <kbd>Space</kbd></button>
+          <button id="modeNote" class="note">筆記 <kbd>Space</kbd></button>
+        </div>
+        <div class="pad" id="pad"></div>
+        <div class="actions">
+          <button id="undoBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>復原</button>
+          <button id="eraseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H8l-5-5 10-10 8 8-7 7"/><path d="m6 12 6 6"/></svg>擦除</button>
+          <button id="autoBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01"/></svg>候選</button>
+          <button id="hintBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/></svg>提示</button>
+        </div>
+      </div>
+
+      <div class="panel toggles">
+        <label>即時標示錯誤 <input type="checkbox" class="sw" id="optCheck" checked></label>
+        <label>填數字時自動清除相關筆記 <input type="checkbox" class="sw" id="optClean" checked></label>
+        <label>高亮相同數字 <input type="checkbox" class="sw" id="optSame" checked></label>
+      </div>
+
+      <div class="hintbar">
+        <span><kbd>⇧</kbd>+<kbd>1-9</kbd> 直接筆記</span>
+        <span><kbd>Space</kbd> 切換筆記</span>
+        <span><kbd>A</kbd> 自動候選</span>
+        <span><kbd>⇧</kbd>拖曳 多選</span>
+        <span><kbd>?</kbd> 全部快捷鍵</span>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="help" id="help"><div class="card">
+  <h2>鍵盤快捷鍵 <span style="font-size:12px;color:var(--muted);font-weight:400">v1.0.0</span></h2>
+  <table>
+    <tr class="sec"><td colspan="2">輸入</td></tr>
+    <tr><td><kbd>1</kbd>–<kbd>9</kbd></td><td>填數字（筆記模式下切換筆記）</td></tr>
+    <tr><td><kbd>⇧ Shift</kbd> + <kbd>1</kbd>–<kbd>9</kbd></td><td>不管模式，直接切換筆記</td></tr>
+    <tr><td><kbd>Space</kbd></td><td>切換 數字 ↔ 筆記 模式</td></tr>
+    <tr><td><kbd>Backspace</kbd> / <kbd>Del</kbd> / <kbd>0</kbd></td><td>擦除（先清數字，再清筆記）</td></tr>
+    <tr><td><kbd>X</kbd></td><td>清除選取格的筆記</td></tr>
+    <tr class="sec"><td colspan="2">筆記工具</td></tr>
+    <tr><td><kbd>A</kbd></td><td>選取格自動填入候選（含籠子組合限制）</td></tr>
+    <tr><td><kbd>⇧ Shift</kbd> + <kbd>A</kbd></td><td>全盤空格自動填入候選</td></tr>
+    <tr><td><kbd>R</kbd></td><td>依目前盤面刪掉選取格不可能的筆記</td></tr>
+    <tr class="sec"><td colspan="2">選取</td></tr>
+    <tr><td>方向鍵</td><td>移動</td></tr>
+    <tr><td><kbd>⇧ Shift</kbd> + 方向鍵</td><td>延伸選取</td></tr>
+    <tr><td>拖曳 / <kbd>⇧</kbd>/<kbd>⌘</kbd> + 點擊</td><td>多選（多格一起下筆記）</td></tr>
+    <tr><td><kbd>G</kbd></td><td>選取整個籠子</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>只保留游標格</td></tr>
+    <tr class="sec"><td colspan="2">其他</td></tr>
+    <tr><td><kbd>⌘/Ctrl</kbd>+<kbd>Z</kbd> 或 <kbd>Z</kbd></td><td>復原</td></tr>
+    <tr><td><kbd>⌘/Ctrl</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> 或 <kbd>Y</kbd></td><td>重做</td></tr>
+    <tr><td><kbd>H</kbd></td><td>提示（揭示游標格）</td></tr>
+    <tr><td><kbd>P</kbd></td><td>暫停 / 繼續</td></tr>
+    <tr><td><kbd>?</kbd></td><td>這個說明</td></tr>
+  </table>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ================= Generator (runs inside a Web Worker) =================
+function genLib(){
+  const POP=new Uint8Array(1024);for(let m=1;m<1024;m++)POP[m]=POP[m>>1]+(m&1);
+  // COMBOS[n][s] = digit masks (bit d = digit d) of n distinct digits summing to s
+  const COMBOS=[];for(let n=0;n<=9;n++){COMBOS.push([]);for(let s=0;s<=45;s++)COMBOS[n].push([]);}
+  for(let m=0;m<512;m++){let s=0,n=0;for(let d=1;d<=9;d++)if(m>>(d-1)&1){s+=d;n++}COMBOS[n][s].push(m<<1)}
+  const BOX=i=>((i/27|0)*3+((i%9)/3|0));
+  const NB=[];for(let i=0;i<81;i++){const r=i/9|0,c=i%9,a=[];if(r)a.push(i-9);if(r<8)a.push(i+9);if(c)a.push(i-1);if(c<8)a.push(i+1);NB.push(a)}
+  const rnd=n=>Math.random()*n|0;
+  const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+  const range=n=>[...Array(n).keys()];
+
+  function solvedGrid(){
+    const g=new Array(81).fill(0),R=new Int32Array(9),C=new Int32Array(9),B=new Int32Array(9);
+    (function rec(i){
+      if(i===81)return true;
+      const r=i/9|0,c=i%9,b=BOX(i);
+      for(const d of shuffle([1,2,3,4,5,6,7,8,9])){
+        const bit=1<<d;if((R[r]|C[c]|B[b])&bit)continue;
+        g[i]=d;R[r]|=bit;C[c]|=bit;B[b]|=bit;
+        if(rec(i+1))return true;
+        R[r]^=bit;C[c]^=bit;B[b]^=bit;
+      }
+      g[i]=0;return false;
+    })(0);
+    return g;
+  }
+
+  const CFG={
+    easy:  {sizes:[[2,6],[3,3]],givens:20},
+    medium:{sizes:[[2,4],[3,4],[4,2]],givens:8},
+    hard:  {sizes:[[2,3],[3,4],[4,3],[5,1]],givens:2},
+    expert:{sizes:[[2,2],[3,4],[4,3],[5,2],[6,1]],givens:0},
+  };
+  function pick(sizes){let t=0;for(const[,w]of sizes)t+=w;let x=Math.random()*t;for(const[s,w]of sizes)if((x-=w)<0)return s;return sizes[0][0]}
+
+  function makeCages(sol,cfg){
+    const cageOf=new Array(81).fill(-1),groups=[];
+    for(const s of shuffle(range(81))){
+      if(cageOf[s]>=0)continue;
+      const id=groups.length,cells=[s],target=pick(cfg.sizes);let used=1<<sol[s];cageOf[s]=id;
+      while(cells.length<target){
+        const fr=[];
+        for(const c of cells)for(const n of NB[c])if(cageOf[n]<0&&!(used>>sol[n]&1)&&!fr.includes(n))fr.push(n);
+        if(!fr.length)break;
+        const n=fr[rnd(fr.length)];cells.push(n);cageOf[n]=id;used|=1<<sol[n];
+      }
+      groups.push(cells);
+    }
+    // merge leftover single cells into a neighbouring cage
+    for(let id=0;id<groups.length;id++){
+      if(groups[id].length!==1)continue;
+      const s=groups[id][0];let best=-1;
+      for(const n of NB[s]){const k=cageOf[n],gk=groups[k];
+        if(k===id||gk.length>=6||gk.some(x=>sol[x]===sol[s]))continue;
+        if(best<0||gk.length<groups[best].length)best=k}
+      if(best>=0){groups[best].push(s);groups[id]=[];cageOf[s]=best}
+    }
+    const cages=groups.filter(g=>g.length).map(g=>{g.sort((a,b)=>a-b);return{cells:g,sum:g.reduce((t,i)=>t+sol[i],0)}});
+    cages.forEach((c,k)=>c.cells.forEach(i=>cageOf[i]=k));
+    return{cages,cageOf};
+  }
+
+  // count solutions (up to limit): constraint propagation (naked/hidden singles,
+  // cage combinations, cage-required digits) + branching on the tightest choice
+  const UN=[];for(let k=0;k<9;k++){UN.push(range(9).map(j=>k*9+j));UN.push(range(9).map(j=>j*9+k))}
+  for(let b=0;b<9;b++){const r0=(b/3|0)*3,c0=b%3*3;UN.push(range(9).map(j=>(r0+(j/3|0))*9+c0+j%3))}
+  const RI=range(81).map(i=>i/9|0),CI=range(81).map(i=>i%9),BI=range(81).map(BOX);
+  function solve(cages,cageOf,grid0,limit,nodeLimit){
+    const nc=cages.length,CC=cages.map(c=>c.cells);
+    let count=0,nodes=0,aborted=false;const sols=[];
+    const st0={g:new Int8Array(81),R:new Int32Array(9),C:new Int32Array(9),B:new Int32Array(9),cu:new Int32Array(nc),cs:new Int32Array(nc),cl:new Int32Array(nc)};
+    cages.forEach((c,k)=>{st0.cs[k]=c.sum;st0.cl[k]=c.cells.length});
+    const clone=s=>({g:s.g.slice(),R:s.R.slice(),C:s.C.slice(),B:s.B.slice(),cu:s.cu.slice(),cs:s.cs.slice(),cl:s.cl.slice()});
+    const cand=new Int32Array(81),ca=new Int32Array(nc),req=new Int32Array(nc);
+    function place(s,i,d){const b=1<<d,k=cageOf[i];
+      if(s.g[i]||(s.R[RI[i]]|s.C[CI[i]]|s.B[BI[i]]|s.cu[k])&b)return false;
+      s.g[i]=d;s.R[RI[i]]|=b;s.C[CI[i]]|=b;s.B[BI[i]]|=b;s.cu[k]|=b;s.cs[k]-=d;s.cl[k]--;return true}
+    for(let i=0;i<81;i++)if(grid0[i]&&!place(st0,i,grid0[i]))return{count:0,sols,aborted:false};
+    // fills cand[]; returns -1 dead, 0 nothing forced, 1 progress made
+    function propagate(s){
+      for(;;){
+        for(let k=0;k<nc;k++){
+          const x=s.cs[k],n=s.cl[k];ca[k]=0;req[k]=0;
+          if(n===0){if(x!==0)return-1;continue}
+          if(x<0||x>45)return-1;
+          let u=0,r=1022;for(const m of COMBOS[n][x])if(!(m&s.cu[k])){u|=m;r&=m}
+          if(!u)return-1;ca[k]=u;req[k]=r;
+        }
+        let prog=false;
+        for(let i=0;i<81;i++){
+          if(s.g[i]){cand[i]=0;continue}
+          const m=ca[cageOf[i]]&~(s.R[RI[i]]|s.C[CI[i]]|s.B[BI[i]]);
+          if(!m)return-1;cand[i]=m;
+          if(!(m&(m-1))){if(!place(s,i,31-Math.clz32(m)))return-1;prog=true}
+        }
+        if(prog)continue;
+        for(const u of UN){
+          let have=0,once=0,twice=0;
+          for(const i of u){if(s.g[i])have|=1<<s.g[i];else{const m=cand[i];twice|=once&m;once|=m}}
+          if((have|once)!==1022)return-1;
+          const single=once&~twice;
+          if(single){for(const i of u){const m=cand[i]&single;if(m&&!s.g[i]){if(m&(m-1))return-1;place(s,i,31-Math.clz32(m));prog=true}}break}
+        }
+        if(prog)continue;
+        // a digit every remaining combo of a cage needs, with only one possible cell
+        for(let k=0;k<nc;k++){
+          const r=req[k];if(!r)continue;
+          let once=0,twice=0;for(const i of CC[k])if(!s.g[i]){const m=cand[i];twice|=once&m;once|=m}
+          if((once&r)!==r)return-1;
+          const single=r&once&~twice;
+          if(single){for(const i of CC[k]){const m=cand[i]&single;if(m&&!s.g[i]){if(m&(m-1))return-1;place(s,i,31-Math.clz32(m));prog=true}}break}
+        }
+        if(!prog)return 0;
+      }
+    }
+    (function rec(s){
+      if(++nodes>nodeLimit){aborted=true;return}
+      if(propagate(s)<0)return;
+      let best=-1,bc=10;
+      for(let i=0;i<81;i++)if(!s.g[i]){const pc=POP[cand[i]];if(pc<bc){bc=pc;best=i;if(pc===2)break}}
+      if(best<0){count++;sols.push(Array.from(s.g));return}
+      const m=cand[best];
+      for(let d=1;d<=9;d++){
+        if(!(m>>d&1))continue;
+        const t=clone(s);
+        if(place(t,best,d))rec(t);
+        if(count>=limit||aborted)return;
+      }
+    })(st0);
+    return{count,sols,aborted};
+  }
+
+  // split a cage at cell i into two connected halves (keeps the puzzle given-free)
+  function splitCage(cages,cageOf,sol,i){
+    const k=cageOf[i],cells=cages[k].cells,n=cells.length;if(n<3)return false;
+    for(let t=0;t<6;t++){
+      const want=1+rnd(n-1),A=[i];
+      while(A.length<want){const fr=[];for(const c of A)for(const x of NB[c])if(cageOf[x]===k&&!A.includes(x)&&!fr.includes(x))fr.push(x);if(!fr.length)break;A.push(fr[rnd(fr.length)])}
+      const Bc=cells.filter(c=>!A.includes(c));if(!Bc.length)continue;
+      const seen=[Bc[0]];for(let q=0;q<seen.length;q++)for(const x of NB[seen[q]])if(Bc.includes(x)&&!seen.includes(x))seen.push(x);
+      if(seen.length!==Bc.length)continue;
+      const mk=g=>({cells:g.sort((a,b)=>a-b),sum:g.reduce((s,c)=>s+sol[c],0)});
+      cages[k]=mk(A);cages.push(mk(Bc));cages.forEach((c,j)=>c.cells.forEach(x=>cageOf[x]=j));
+      return true;
+    }
+    return false;
+  }
+
+  function generate(diff){
+    const cfg=CFG[diff]||CFG.expert,NL=40000;
+    for(let a=0;a<300;a++){
+      const sol=solvedGrid(),{cages,cageOf}=makeCages(sol,cfg);
+      const grid=new Array(81).fill(0);
+      shuffle(range(81)).slice(0,cfg.givens).forEach(i=>grid[i]=sol[i]);
+      let r=solve(cages,cageOf,grid,2,NL);
+      for(let t=0;t<14&&r.count>1&&!r.aborted;t++){
+        const alt=r.sols.find(s=>s.some((v,i)=>v!==sol[i]));
+        const diffs=shuffle(range(81).filter(i=>alt[i]!==sol[i])).sort((x,y)=>cages[cageOf[y]].cells.length-cages[cageOf[x]].cells.length);
+        let fixed=false;
+        for(const i of diffs)if(splitCage(cages,cageOf,sol,i)){fixed=true;break}
+        if(!fixed){const i=diffs[0];grid[i]=sol[i]}
+        r=solve(cages,cageOf,grid,2,NL);
+      }
+      if(r.count===1&&!r.aborted)return{solution:sol,cages,givens:grid,tries:a+1};
+    }
+    throw new Error('generation failed');
+  }
+  return{generate,COMBOS,POP};
+}
+
+// ================= App =================
+const LIB=genLib(),COMBOS=LIB.COMBOS,POP=LIB.POP;
+const $=s=>document.querySelector(s);
+const ROW=i=>i/9|0,COL=i=>i%9,BOXI=i=>((i/27|0)*3+((i%9)/3|0));
+const UNITS=[];for(let k=0;k<9;k++){UNITS.push([...Array(9)].map((_,j)=>k*9+j));UNITS.push([...Array(9)].map((_,j)=>j*9+k));}
+for(let b=0;b<9;b++){const r0=(b/3|0)*3,c0=b%3*3,u=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)u.push((r0+r)*9+c0+c);UNITS.push(u)}
+const PEERS=[...Array(81)].map((_,i)=>{const s=new Set();UNITS.forEach(u=>{if(u.includes(i))u.forEach(j=>j!==i&&s.add(j))});return[...s]});
+const DIFF_LABEL={easy:'簡單',medium:'中等',hard:'困難',expert:'專家'};
+const SAVE_KEY='killer-sudoku-v1';
+
+let S=null;                 // game state
+let sel=new Set(),cursor=40,noteMode=false,paused=false;
+let undoStack=[],redoStack=[];
+const opts=Object.assign({check:true,clean:true,same:true,theme:'dark',diff:'expert'},JSON.parse(localStorage.getItem(SAVE_KEY+'-opts')||'{}'));
+
+// ---------- worker ----------
+let worker=null;
+try{worker=new Worker(URL.createObjectURL(new Blob([genLib.toString()+';const L=genLib();onmessage=e=>{try{postMessage({ok:L.generate(e.data)})}catch(err){postMessage({err:String(err)})}}'],{type:'text/javascript'})))}catch(e){worker=null}
+function generate(diff){
+  return new Promise((res,rej)=>{
+    if(!worker){setTimeout(()=>{try{res(LIB.generate(diff))}catch(e){rej(e)}},30);return}
+    worker.onmessage=e=>e.data.ok?res(e.data.ok):rej(e.data.err);
+    worker.postMessage(diff);
+  });
+}
+
+// ---------- build DOM ----------
+const cellsEl=$('#cells'),cellEls=[],valEls=[],noteEls=[];
+for(let i=0;i<81;i++){
+  const c=document.createElement('div');c.className='cell';c.dataset.i=i;
+  const v=document.createElement('span');v.className='v';
+  const n=document.createElement('div');n.className='notes';
+  const ns=[];for(let d=1;d<=9;d++){const x=document.createElement('i');x.textContent=d;n.appendChild(x);ns.push(x)}
+  c.append(n,v);cellsEl.appendChild(c);cellEls.push(c);valEls.push(v);noteEls.push(ns);
+}
+const padEl=$('#pad'),padBtns=[];
+for(let d=1;d<=9;d++){const b=document.createElement('button');b.innerHTML=d+'<span class="cnt"></span>';b.onclick=e=>inputDigit(d,e.shiftKey);padEl.appendChild(b);padBtns.push(b)}
+
+// ---------- game setup ----------
+async function newGame(diff){
+  diff=diff||opts.diff;opts.diff=diff;saveOpts();
+  $('#loading').classList.add('show');$('#winCover').classList.remove('show');$('#board').classList.remove('win');
+  setPaused(false);
+  try{
+    const p=await generate(diff);
+    const cageOf=new Array(81);p.cages.forEach((c,k)=>c.cells.forEach(i=>cageOf[i]=k));
+    S={diff,solution:p.solution,cages:p.cages,cageOf,givens:p.givens.map(v=>v>0),
+       values:p.givens.slice(),notes:new Array(81).fill(0),hinted:new Array(81).fill(false),
+       mistakes:0,elapsed:0,done:false};
+    undoStack=[];redoStack=[];cursor=40;sel=new Set([40]);noteMode=false;
+    drawSvg();render();save();
+  }catch(e){toast('產生失敗，請再試一次')}
+  $('#loading').classList.remove('show');
+}
+
+function drawSvg(){
+  const U=100,I=7,cg=S.cageOf;
+  const same=(r,c,k)=>r>=0&&r<9&&c>=0&&c<9&&cg[r*9+c]===k;
+  let thin='',thick='',cage='',labels='';
+  for(let k=1;k<9;k++){const p=k*U;const seg=`M${p} 0V900M0 ${p}H900`;if(k%3)thin+=seg;else thick+=seg}
+  S.cages.forEach((cgObj,k)=>{
+    const first=cgObj.cells[0],fr=ROW(first),fc=COL(first);
+    const lw=cgObj.sum>9?30:19,lh=22;
+    labels+=`<text x="${fc*U+I+1}" y="${fr*U+I+16}">${cgObj.sum}</text>`;
+    for(const i of cgObj.cells){
+      const r=ROW(i),c=COL(i),x=c*U,y=r*U,isFirst=i===first;
+      // horizontal edges (top dr=-1, bottom dr=1)
+      for(const dr of[-1,1]){
+        if(same(r+dr,c,k))continue;
+        const yy=dr<0?y+I:y+U-I;
+        let x0=!same(r,c-1,k)?x+I:same(r+dr,c-1,k)?x-I:x;
+        let x1=!same(r,c+1,k)?x+U-I:same(r+dr,c+1,k)?x+U+I:x+U;
+        if(isFirst&&dr<0)x0+=lw;
+        cage+=`M${x0} ${yy}H${x1}`;
+      }
+      for(const dc of[-1,1]){
+        if(same(r,c+dc,k))continue;
+        const xx=dc<0?x+I:x+U-I;
+        let y0=!same(r-1,c,k)?y+I:same(r-1,c+dc,k)?y-I:y;
+        let y1=!same(r+1,c,k)?y+U-I:same(r+1,c+dc,k)?y+U+I:y+U;
+        if(isFirst&&dc<0)y0+=lh;
+        cage+=`M${xx} ${y0}V${y1}`;
+      }
+    }
+  });
+  $('#svg').innerHTML=
+    `<path d="${thin}" stroke="var(--thin)" stroke-width="2" fill="none" vector-effect="non-scaling-stroke"/>`+
+    `<path d="${cage}" stroke="var(--cage)" stroke-width="1.3" stroke-dasharray="4 3.5" fill="none" vector-effect="non-scaling-stroke"/>`+
+    `<path d="${thick}" stroke="var(--thick)" stroke-width="2.2" fill="none" vector-effect="non-scaling-stroke"/>`+
+    `<g fill="var(--sum)" font-size="17" font-weight="600" font-family="ui-rounded,system-ui,sans-serif">${labels}</g>`;
+}
+
+// ---------- derived info ----------
+function cageAllowed(k,values){
+  const c=S.cages[k];let placed=0,cnt=0;
+  for(const i of c.cells)if(values[i]){placed|=1<<values[i];cnt++}
+  let u=0;for(const m of COMBOS[c.cells.length][c.sum])if((m&placed)===placed)u|=m;
+  return u&~placed;
+}
+function candidates(i,values){
+  let m=1022;for(const p of PEERS[i])if(values[p])m&=~(1<<values[p]);
+  return m&cageAllowed(S.cageOf[i],values);
+}
+function conflicts(){
+  const bad=new Set(),v=S.values;
+  const groups=UNITS.concat(S.cages.map(c=>c.cells));
+  for(const u of groups){const seen={};for(const i of u)if(v[i]){(seen[v[i]]=seen[v[i]]||[]).push(i)}
+    for(const d in seen)if(seen[d].length>1)seen[d].forEach(i=>bad.add(i))}
+  for(const c of S.cages){let s=0,f=0;for(const i of c.cells)if(v[i]){s+=v[i];f++}
+    if(s>c.sum||(f===c.cells.length&&s!==c.sum)||(f<c.cells.length&&s>=c.sum))c.cells.forEach(i=>v[i]&&bad.add(i))}
+  return bad;
+}
+
+// ---------- render ----------
+function render(){
+  if(!S)return;
+  const v=S.values,curV=v[cursor],k=S.cageOf[cursor],bad=conflicts();
+  for(let i=0;i<81;i++){
+    const cls=['cell'];
+    if(i===cursor)cls.push('cur');
+    else if(sel.has(i))cls.push('sel');
+    else if(opts.same&&curV&&v[i]===curV)cls.push('same');
+    else if(sel.size===1&&PEERS[cursor].includes(i))cls.push('peer');
+    else if(sel.size===1&&S.cageOf[i]===k)cls.push('cagehl');
+    if(S.givens[i])cls.push('given');
+    if(S.hinted[i])cls.push('hinted');
+    const wrong=opts.check&&v[i]&&!S.givens[i]&&v[i]!==S.solution[i];
+    if(bad.has(i)||wrong)cls.push('err');
+    if(wrong)cls.push('wrong');
+    cellEls[i].className=cls.join(' ');
+    valEls[i].textContent=v[i]||'';
+    const n=v[i]?0:S.notes[i];
+    for(let d=1;d<=9;d++){const e=noteEls[i][d-1],on=!!(n>>d&1);
+      e.className=on?(opts.same&&curV===d?'on hit':'on'):''}
+  }
+  // pad
+  const cnt=new Array(10).fill(0);v.forEach((x,i)=>{if(x&&x===S.solution[i])cnt[x]++});
+  padBtns.forEach((b,j)=>{const d=j+1;b.classList.toggle('done',cnt[d]>=9);b.querySelector('.cnt').textContent=9-cnt[d]||''});
+  padEl.classList.toggle('notemode',noteMode);
+  $('#modeNormal').classList.toggle('on',!noteMode);$('#modeNote').classList.toggle('on',noteMode);
+  $('#mistakes').textContent=S.mistakes;
+  document.querySelectorAll('#diffs button').forEach(b=>b.classList.toggle('on',b.dataset.d===S.diff));
+  renderCage();
+}
+function renderCage(){
+  const c=S.cages[S.cageOf[cursor]],v=S.values;
+  let placed=0,filled=0,s=0;for(const i of c.cells)if(v[i]){placed|=1<<v[i];filled++;s+=v[i]}
+  $('#cageSum').textContent=c.sum;
+  $('#cageSize').textContent=c.cells.length+' 格';
+  let detail=filled?`已填 ${filled}/${c.cells.length} · 剩 ${c.sum-s}`:`${c.cells.length} 格和為 ${c.sum}`;
+  if(sel.size>1){let ss=0,sf=0;sel.forEach(i=>{if(v[i]){ss+=v[i];sf++}});detail=`選取 ${sel.size} 格 · 已填和 ${ss}`}
+  $('#cageDetail').textContent=detail;
+  const list=COMBOS[c.cells.length][c.sum];
+  const live=list.filter(m=>(m&placed)===placed);
+  $('#combos').innerHTML=list.map(m=>{
+    let t='';for(let d=1;d<=9;d++)if(m>>d&1)t+=d;
+    const dead=(m&placed)!==placed;
+    return `<span class="combo${dead?' dead':''}${!dead&&live.length===1?' only':''}">${t}</span>`;
+  }).join('');
+}
+
+// ---------- history ----------
+const snap=()=>({values:S.values.slice(),notes:S.notes.slice(),hinted:S.hinted.slice()});
+const sameSnap=(a,b)=>a.values.every((x,i)=>x===b.values[i])&&a.notes.every((x,i)=>x===b.notes[i]);
+function mutate(fn){
+  if(!S||S.done||paused)return;
+  const before=snap();fn();
+  if(sameSnap(before,snap()))return;
+  undoStack.push(before);if(undoStack.length>500)undoStack.shift();redoStack=[];
+  afterChange();
+}
+function restore(s){S.values=s.values;S.notes=s.notes;S.hinted=s.hinted}
+function undo(){if(!S||S.done||paused||!undoStack.length)return;redoStack.push(snap());restore(undoStack.pop());afterChange()}
+function redo(){if(!S||S.done||paused||!redoStack.length)return;undoStack.push(snap());restore(redoStack.pop());afterChange()}
+function afterChange(){
+  render();
+  if(S.values.every((x,i)=>x===S.solution[i])){
+    S.done=true;$('#board').classList.add('win');
+    setTimeout(()=>{$('#winText').textContent=`${DIFF_LABEL[S.diff]} · 時間 ${fmt(S.elapsed)} · 錯誤 ${S.mistakes}`;$('#winCover').classList.add('show')},700);
+  }
+  save();
+}
+
+// ---------- actions ----------
+const editable=()=>[...sel].filter(i=>!S.givens[i]);
+function inputDigit(d,forceNote){
+  mutate(()=>{
+    const t=editable();if(!t.length)return;
+    const bit=1<<d;
+    if(noteMode||forceNote){
+      const e=t.filter(i=>!S.values[i]);if(!e.length)return;
+      const all=e.every(i=>S.notes[i]&bit);
+      e.forEach(i=>S.notes[i]=all?S.notes[i]&~bit:S.notes[i]|bit);
+    }else{
+      if(t.length===1&&S.values[t[0]]===d){S.values[t[0]]=0;return}
+      for(const i of t){
+        if(S.values[i]===d)continue;
+        S.values[i]=d;S.notes[i]=0;
+        if(opts.check&&d!==S.solution[i])S.mistakes++;
+        if(opts.clean){for(const p of PEERS[i])S.notes[p]&=~bit;for(const p of S.cages[S.cageOf[i]].cells)S.notes[p]&=~bit}
+      }
+    }
+  });
+}
+function erase(){mutate(()=>{const t=editable();const hasV=t.some(i=>S.values[i]);
+  t.forEach(i=>{if(hasV){if(!S.hinted[i])S.values[i]=0}else S.notes[i]=0})})}
+function clearNotes(){mutate(()=>editable().forEach(i=>S.notes[i]=0))}
+function autoCandidates(all){
+  mutate(()=>{const t=all?[...Array(81).keys()]:editable();
+    t.forEach(i=>{if(!S.givens[i]&&!S.values[i])S.notes[i]=candidates(i,S.values)})});
+  toast(all?'已為全盤填入候選':'已填入候選');
+}
+function pruneNotes(){mutate(()=>{const t=sel.size>1?editable():[...Array(81).keys()];
+  t.forEach(i=>{if(!S.values[i]&&S.notes[i])S.notes[i]&=candidates(i,S.values)})});toast('已刪除不可能的筆記')}
+function hint(){
+  if(!S||S.done||paused)return;
+  let i=cursor;
+  if(S.givens[i]||S.values[i]===S.solution[i]){
+    const empty=[...Array(81).keys()].filter(j=>S.values[j]!==S.solution[j]);if(!empty.length)return;
+    i=empty[Math.random()*empty.length|0];
+  }
+  mutate(()=>{const d=S.solution[i];S.values[i]=d;S.notes[i]=0;S.hinted[i]=true;
+    if(opts.clean){for(const p of PEERS[i])S.notes[p]&=~(1<<d);for(const p of S.cages[S.cageOf[i]].cells)S.notes[p]&=~(1<<d)}});
+  cursor=i;sel=new Set([i]);render();
+}
+function setNoteMode(on){noteMode=on;render()}
+function move(dr,dc,extend){
+  let r=ROW(cursor),c=COL(cursor);r=(r+dr+9)%9;c=(c+dc+9)%9;cursor=r*9+c;
+  if(extend)sel.add(cursor);else sel=new Set([cursor]);render();
+}
+function selectCage(){sel=new Set(S.cages[S.cageOf[cursor]].cells);render()}
+
+// ---------- pointer selection ----------
+let dragging=false;
+const cellAt=(x,y)=>{const el=document.elementFromPoint(x,y);const c=el&&el.closest('.cell');return c?+c.dataset.i:-1};
+cellsEl.addEventListener('pointerdown',e=>{
+  if(!S||paused)return;const i=cellAt(e.clientX,e.clientY);if(i<0)return;
+  if(e.shiftKey||e.metaKey||e.ctrlKey){if(sel.has(i)&&sel.size>1&&(e.metaKey||e.ctrlKey))sel.delete(i);else sel.add(i)}
+  else sel=new Set([i]);
+  cursor=i;dragging=true;render();
+});
+addEventListener('pointermove',e=>{if(!dragging)return;const i=cellAt(e.clientX,e.clientY);if(i>=0&&!sel.has(i)){sel.add(i);cursor=i;render()}});
+addEventListener('pointerup',()=>dragging=false);
+
+// ---------- keyboard ----------
+addEventListener('keydown',e=>{
+  if($('#help').classList.contains('show')){if(e.key==='Escape'||e.key==='?')$('#help').classList.remove('show');return}
+  const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase();
+  if(mod&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
+  if(mod&&k==='y'){e.preventDefault();redo();return}
+  if(mod||e.altKey&&!/^(Digit|Numpad)/.test(e.code))return;
+  if(k==='p'){togglePause();return}
+  if(e.key==='?'){$('#help').classList.add('show');return}
+  if(paused||!S)return;
+  const dm=e.code.match(/^(?:Digit|Numpad)([0-9])$/);
+  if(dm){e.preventDefault();const d=+dm[1];d?inputDigit(d,e.shiftKey||e.altKey):erase();return}
+  const arrows={arrowup:[-1,0],arrowdown:[1,0],arrowleft:[0,-1],arrowright:[0,1]};
+  if(arrows[k]){e.preventDefault();move(...arrows[k],e.shiftKey);return}
+  switch(k){
+    case ' ':e.preventDefault();setNoteMode(!noteMode);break;
+    case 'backspace':case 'delete':e.preventDefault();erase();break;
+    case 'a':autoCandidates(e.shiftKey);break;
+    case 'r':pruneNotes();break;
+    case 'x':clearNotes();break;
+    case 'g':selectCage();break;
+    case 'h':hint();break;
+    case 'z':undo();break;
+    case 'y':redo();break;
+    case 'escape':sel=new Set([cursor]);render();break;
+  }
+});
+
+// ---------- misc UI ----------
+function fmt(s){const h=s/3600|0,m=(s/60|0)%60,x=s%60;return(h?h+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')}
+setInterval(()=>{if(S&&!S.done&&!paused&&!document.hidden){S.elapsed++;$('#timer').textContent=fmt(S.elapsed);if(S.elapsed%5===0)save()}},1000);
+function setPaused(p){paused=p;autoPaused=false;$('#board').classList.toggle('paused',p);$('#pauseCover').classList.toggle('show',p)}
+function togglePause(){if(S&&!S.done)setPaused(!paused)}
+// auto-pause when leaving the tab/window; only auto-resume a pause we started ourselves
+let autoPaused=false;
+function autoPause(){if(S&&!S.done&&!paused){setPaused(true);autoPaused=true}}
+function autoResume(){if(autoPaused)setPaused(false)}
+document.addEventListener('visibilitychange',()=>document.hidden?autoPause():autoResume());
+addEventListener('blur',autoPause);addEventListener('focus',autoResume);
+let toastT;function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1400)}
+function save(){if(S)localStorage.setItem(SAVE_KEY,JSON.stringify(S))}
+function saveOpts(){localStorage.setItem(SAVE_KEY+'-opts',JSON.stringify(opts))}
+function applyTheme(){document.documentElement.classList.toggle('light',opts.theme==='light')}
+
+$('#pauseBtn').onclick=togglePause;$('#resumeBtn').onclick=()=>setPaused(false);
+$('#themeBtn').onclick=()=>{opts.theme=opts.theme==='light'?'dark':'light';applyTheme();saveOpts()};
+$('#helpBtn').onclick=()=>$('#help').classList.add('show');
+$('#help').onclick=e=>{if(e.target.id==='help')$('#help').classList.remove('show')};
+$('#newBtn').onclick=()=>newGame(opts.diff);$('#winNew').onclick=()=>newGame(opts.diff);
+document.querySelectorAll('#diffs button').forEach(b=>b.onclick=()=>newGame(b.dataset.d));
+$('#modeNormal').onclick=()=>setNoteMode(false);$('#modeNote').onclick=()=>setNoteMode(true);
+$('#undoBtn').onclick=undo;$('#eraseBtn').onclick=erase;$('#hintBtn').onclick=hint;
+$('#autoBtn').onclick=e=>autoCandidates(e.shiftKey||sel.size===1&&!editable().length);
+[['optCheck','check'],['optClean','clean'],['optSame','same']].forEach(([id,key])=>{const el=$('#'+id);el.checked=opts[key];el.onchange=()=>{opts[key]=el.checked;saveOpts();render();el.blur()}});
+document.querySelectorAll('button').forEach(b=>b.addEventListener('mouseup',()=>b.blur()));
+
+function fitChrome(){const h=document.getElementById('global-header'),f=document.getElementById('global-footer');
+  document.documentElement.style.setProperty('--chrome',((h?h.offsetHeight:0)+(f?f.offsetHeight:0))+'px')
+  if(f)document.querySelector('.app').style.paddingBottom=(f.offsetHeight+16)+'px'}
+addEventListener('load',fitChrome);addEventListener('resize',fitChrome);
+
+applyTheme();
+try{const saved=JSON.parse(localStorage.getItem(SAVE_KEY));
+  if(saved&&!saved.done&&saved.cages){S=saved;sel=new Set([cursor]);drawSvg();render();$('#timer').textContent=fmt(S.elapsed)}
+  else newGame(opts.diff);
+}catch(e){newGame(opts.diff)}
+</script>
+<script src="/shared/layout.js"></script>
+</body>
+</html>
